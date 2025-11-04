@@ -17,14 +17,21 @@
                             "@types/node":  "24.9.2",
                             "@types/react":  "19.2.2",
                             "autoprefixer":  "^10.4.21",
+                            "cross-env":  "^10.1.0",
                             "postcss":  "^8.5.6",
                             "tailwindcss":  "^3.4.13",
                             "tailwindcss-animate":  "^1.0.7",
                             "typescript":  "5.9.3"
                         },
     "scripts":  {
-                    "dev":  "next dev",
+                    "heroku-postbuild":  "next build",
                     "build":  "next build",
-                    "start":  "next start -p $PORT"
+                    "dev":  "next dev",
+                    "start:3010":  "cross-env PORT=3010 next start",
+                    "start":  "next start"
+                },
+    "engines":  {
+                    "node":  "\u003e=18 \u003c23",
+                    "npm":  "\u003e=9"
                 }
 }
