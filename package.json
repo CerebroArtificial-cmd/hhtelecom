@@ -31,7 +31,8 @@
                     "start":  "next start"
                 },
     "engines":  {
-                    "node":  "\u003e=18 \u003c23",
-                    "npm":  "\u003e=9"
+                    "node":  "20.x",
+                    "npm":  ">=9"
                 }
+
 }
