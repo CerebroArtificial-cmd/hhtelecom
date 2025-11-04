@@ -103,3 +103,16 @@ Contribuindo
 
 Licença
 - Uso interno do projeto. Adapte conforme a política da sua organização.
+
+
+## Heroku (Config Vars)
+- Heroku ignora arquivos .env em produção. Configure as variáveis no painel (Settings → Config Vars) ou via CLI.
+- CLI exemplos:
+  - heroku config:set MAKE_WEBHOOK_URL='https://hook.us2.make.com/...' --app <app>
+  - heroku config:set CTM_API_KEY='your-key' --app <app>
+  - heroku config:set NEXT_TELEMETRY_DISABLED=1 --app <app>
+
+## Ambiente local (.env.local)
+- Para desenvolvimento local, copie .env.local.example para .env.local e preencha os valores.
+- Mantenha .env e .env.local fora do git (já estão no .gitignore).
+- Para rodar localmente: npm run dev (ou defina PORT no .env.local).
