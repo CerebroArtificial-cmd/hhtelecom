@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import "../styles/globals.css";
 import Image from "next/image";
 import { Toaster } from "@/components/ui/toast";

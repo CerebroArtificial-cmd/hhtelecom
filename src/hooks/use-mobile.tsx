@@ -1,4 +1,4 @@
-// shadcn-ui/src/hooks/use-mobile.tsx
+﻿// shadcn-ui/src/hooks/use-mobile.tsx
 import * as React from "react";
 
 type Breakpoints = {
@@ -129,3 +129,4 @@ export function useIsMobile() {
   const { isMobile } = useResponsive();
   return isMobile;
 }
+

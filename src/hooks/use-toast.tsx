@@ -50,3 +50,4 @@ export const toast = (t: Omit<ToastItem, "id">) => {
   console.warn("Prefira useToast().toast(...) dentro de um <ToastProvider>.");
   return { id: "noop", dismiss: () => {} };
 };
+
