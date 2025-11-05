@@ -160,3 +160,4 @@ export default function Infrastructure({ data, onChange }: InfrastructureProps) 
     </Card>
   );
 }
+

@@ -32,7 +32,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
             id="vegetacaoExistente"
             value={data.vegetacaoExistente || ""}
             onChange={(e) => onChange("vegetacaoExistente", e.target.value)}
-            placeholder="Dentro da área: indicar no croqui e informar espécie. Fora da área: indicar e informar distância"
+            placeholder="Dentro da área: indicar no Croqui e informar espécie. Fora da área: indicar e informar distância"
             rows={3}
           />
         </div>
@@ -43,7 +43,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
             id="construcoesTerreno"
             value={data.construcoesTerreno || ""}
             onChange={(e) => onChange("construcoesTerreno", e.target.value)}
-            placeholder="Dentro da área: indicar no croqui todas as dimensões e localização. Fora da área: indicar e informar distância"
+            placeholder="Dentro da área: indicar no Croqui todas as dimensões e localização. Fora da área: indicar e informar distância"
             rows={3}
           />
         </div>
@@ -96,3 +96,4 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
     </Card>
   );
 }
+

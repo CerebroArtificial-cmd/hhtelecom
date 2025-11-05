@@ -59,3 +59,4 @@ export default function RulesSection({ data, onChange }: Props) {
     </Card>
   );
 }
+

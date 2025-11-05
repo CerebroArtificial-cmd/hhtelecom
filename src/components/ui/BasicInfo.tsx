@@ -79,22 +79,23 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
           </div>
         </div>
 
-        {/* Endereço do Site, Bairro e CEP */}
+        {/* Endereço do Site, bairro e CEP */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="enderecoSite">Endereço do Site</Label>
             <Input id="enderecoSite" value={data.enderecoSite || ''} onChange={(e) => onChange('enderecoSite', e.target.value)} placeholder="Endereço do site" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bairro">Bairro</Label>
+            <Label htmlFor="bairro">bairro</Label>
             <Input id="bairro" value={data.bairro || ''} onChange={(e) => onChange('bairro', e.target.value)} placeholder="Nome do bairro" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="cep">CEP</Label>
-            <Input id="cep" value={data.cep || ''} onChange={(e) => onChange('cep', e.target.value)} placeholder="Ex.: 00000-000" />
+            <Label htmlFor="CEP">CEP</Label>
+            <Input id="CEP" value={data.CEP || ''} onChange={(e) => onChange('CEP', e.target.value)} placeholder="Ex.: 00000-000" />
           </div>
         </div>
       </CardContent>
     </Card>
   );
 }
+
