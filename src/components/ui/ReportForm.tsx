@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +12,7 @@ import Infrastructure from './Infrastructure';
 import PhotoChecklist from './PhotoChecklist';
 import SketchSection from './SketchSection';
 import RulesSection from './RulesSection';
+import { clearAllPhotos } from '@/lib/idb';
 
 async function fileToDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -23,8 +24,12 @@ async function fileToDataURL(file: File): Promise<string> {
 }
 
 export default function ReportForm() {
+  const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+
   const [formData, setFormData] = useState<ReportData>({});
   const [activeTab, setActiveTab] = useState('inicio');
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const importRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const savedData = localStorage.getItem('visitReport');
@@ -43,6 +48,17 @@ export default function ReportForm() {
     }
   }, [formData]);
 
+  useEffect(() => {
+    const on = () => setIsOnline(true);
+    const off = () => setIsOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
+  }, []);
+
   const handleFieldChange = (
     field: string,
     value: string | boolean | string[] | Record<string, boolean> | Record<string, any>
@@ -58,15 +74,80 @@ export default function ReportForm() {
     toast.success('Relatório salvo com sucesso!');
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (window.confirm('Tem certeza que deseja limpar todos os dados?')) {
       setFormData({});
       localStorage.removeItem('visitReport');
+      await clearAllPhotos();
       toast.success('Dados limpos com sucesso!');
     }
   };
 
+  const serializeForExport = async (data: ReportData) => {
+    const copy: any = JSON.parse(JSON.stringify(data || {}));
+    const ph = (data as any).photosUploads || {};
+    const outPhotos: Record<string, any> = {};
+    for (const key of Object.keys(ph)) {
+      const entry = ph[key] || {};
+      if (entry.urls && entry.urls.length > 0) {
+        outPhotos[key] = { ...entry, urls: entry.urls };
+      } else if (entry.files && entry.files.length > 0) {
+        const urls: string[] = [];
+        for (const f of entry.files as File[]) urls.push(await fileToDataURL(f));
+        outPhotos[key] = { ...entry, urls, files: undefined };
+      } else {
+        outPhotos[key] = entry;
+      }
+    }
+    copy.photosUploads = outPhotos;
+    return copy;
+  };
+
+  const handleExport = async () => {
+    try {
+      const payload = await serializeForExport(formData);
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "relatorio.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success('Exportado como JSON.');
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Falha ao exportar JSON.');
+    }
+  };
+
+  const handleImportClick = () => {
+    importRef.current?.click();
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      setFormData(json);
+      localStorage.setItem('visitReport', JSON.stringify(json));
+      toast.success('Dados importados com sucesso!');
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Falha ao importar JSON.');
+    } finally {
+      if (importRef.current) importRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async () => {
+    if (!isOnline) {
+      toast.error('Você está offline. Envio indisponível.');
+      return;
+    }
     try {
       const photos: any = {};
       const ph = (formData as any).photosUploads || {};
@@ -85,7 +166,7 @@ export default function ReportForm() {
         photos[key] = { images, coords: entry.coords };
       }
 
-      const res = await fetch('/api/relatorios', {
+      const res = await fetch(API_BASE + '/api/relatorios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, photosUploads: photos, timestamp_iso: new Date().toISOString() }),
@@ -93,7 +174,7 @@ export default function ReportForm() {
       if (!res.ok) {
         const text = await res.text();
         toast.error('Falha ao enviar relatório');
-        console.error('Make error:', res.status, text);
+        console.error('Backend error:', res.status, text);
         return;
       }
       toast.success('Relatório enviado com sucesso!');
@@ -134,21 +215,27 @@ export default function ReportForm() {
             <div>
               <CardTitle className="text-2xl">Relatório de Buscas</CardTitle>
               <p className="text-muted-foreground mt-1">Progresso: {pct}% completo</p>
+              {!isOnline && (
+                <p className="text-xs text-amber-700 mt-1">Você está offline. É possível salvar/exportar, mas não enviar.</p>
+              )}
             </div>
             <div className="flex flex-wrap gap-2 justify-end">
               <Button className="bg-[#054059] hover:bg-[#04364b] text-white w-full sm:w-auto" onClick={handleClear}>Limpar</Button>
               <Button className="bg-[#03571f] hover:bg-[#024a1a] text-white w-full sm:w-auto" onClick={handleSave}>Salvar</Button>
+              <Button className="bg-[#77807a] hover:bg-[#5f6762] text-white w-full sm:w-auto" onClick={handleExport}>Exportar</Button>
+              <input ref={importRef} type="file" accept="application/json" className="hidden" onChange={handleImport} />
+              <Button className="bg-[#77807a] hover:bg-[#5f6762] text-white w-full sm:w-auto" onClick={handleImportClick}>Importar</Button>
               <Button
-                className={`text-white w-full sm:w-auto ${idx < order.length - 1 ? 'bg-[#77807a] hover:bg-[#5f6762]' : 'bg-[#D9452F] hover:bg-[#bf3a29]'}`}
+                className={	ext-white w-full sm:w-auto }
                 onClick={handleSubmit}
-                disabled={idx < order.length - 1}
+                disabled={idx < order.length - 1 || !isOnline}
               >
                 Enviar
               </Button>
             </div>
           </div>
           <div className="mt-2 h-2 w-full bg-gray-200 rounded">
-            <div className="h-full rounded" style={{ width: `${pct}%`, backgroundColor: "#77807a" }} />
+            <div className="h-full rounded" style={{ width: ${pct}%, backgroundColor: "#77807a" }} />
           </div>
         </CardHeader>
         <CardContent>
@@ -197,7 +284,7 @@ export default function ReportForm() {
                     if (i > 0) setActiveTab(order[i - 1]);
                   }}
                 >Voltar</Button>
-                <Button className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto" onClick={handleSubmit}>Enviar</Button>
+                <Button className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto" onClick={handleSubmit} disabled={!isOnline}>Enviar</Button>
               </div>
             </div>
           ) : (
@@ -227,4 +314,7 @@ export default function ReportForm() {
     </div>
   );
 }
+
+
+
 

@@ -1,0 +1,5 @@
+﻿# Run Next.js + Flask in Replit
+run = "bash -lc 'pip install -r backend/requirements.txt && npm install && npm run dev:full'"
+
+[env]
+PORT = "3000"

@@ -1,47 +1,33 @@
-﻿Relatório de Visita Externa - MVP Todo List
+﻿Relatório de Visita Externa - TODO
 
-- [ ] Revisar e padronizar todos os rótulos PT‑BR nos componentes (acentuação, termos CTM)
-- [ ] Mapear IDs dos itens de foto para rótulos CTM exatos (ex.: Frente 1/2, Rua Acesso dir/esq, etc.)
-- [ ] Validar obrigatórios por aba (mínimos de fotos, campos chave como siteType, cidade, proprietário)
-- [ ] Indicadores de progresso por aba e erros em destaque (UX)
-- [ ] Melhorar máscara/normalização (telefone, CEP, moeda) na entrada do usuário
+Geral
+- [ ] Padronizar rótulos PT-BR (acentos/termos CTM)
+- [ ] Validar obrigatórios por aba (mínimos de fotos, campos chave)
+- [ ] Indicadores de progresso por aba e erros em destaque
+- [ ] Melhorar máscaras de entrada (telefone, CEP, moeda)
 
-Integração Make.com
-- [x] Enviar dados normalizados via builder (send-report) para o Make (webhook)
-- [ ] Adicionar exemplo de payload no README para facilitar mapeamento no Make
-- [ ] Implementar retentativas/retry simples no frontend em falha de rede
-- [ ] Opcional: assinar requests com token próprio (CTM_API_KEY) e validar no Make
+Backend (Flask + Excel)
+- [x] API /api/relatorios grava em Planilha_Visita_Site.xlsx (aba Relatorios)
+- [ ] Sanitizar payload (whitelist/casting) antes de gravar
+- [ ] Tratar arquivo bloqueado/aberto e mensagens de erro mais claras
+- [ ] Rotina de backup/rotação do Excel (opcional)
 
-Fotos e armazenamento
-- [x] Enviar fotos como data URL (base64) no MVP
-- [ ] Integrar storage (S3/Cloudinary) e enviar URLs públicas em vez de base64
-- [ ] Limitar tamanho/resolução das fotos no cliente (compressão antes do upload)
-- [ ] Mostrar contadores/validação de múltiplas fotos (ex.: 12 fotos 360º)
+Frontend (Next.js)
+- [x] Enviar para BACKEND_URL em vez de Make
+- [x] PWA (service worker simples)
+- [x] Offline-first (localStorage + IndexedDB para fotos)
+- [x] Exportar/Importar JSON
+- [ ] Spinner/feedback no botão Enviar
+- [ ] Acessibilidade (labels, aria-*, foco, contraste)
+- [ ] Responsividade mobile (inputs touch-friendly)
 
-Frontend (UI/UX)
-- [x] Adicionar aba “Regras/Observações” com checkboxes e textarea
-- [ ] Melhorar acessibilidade (labels, aria-*, foco, contraste)
-- [ ] Responsividade móvel (testes em diferentes tamanhos, inputs touch‑friendly)
-- [ ] Feedback de carregamento no botão Enviar (spinner/disabled)
-
-Backend (API)
-- [x] Rota /api/relatorios com normalização e envio ao Make
-- [ ] Sanitização adicional do payload (whitelist de campos)
-- [ ] Limites de tamanho do body (fotos base64) e mensagens claras de erro
-
-Deploy (Heroku)
-- [x] Scripts de build/start (Next)
-- [ ] Configurar MAKE_WEBHOOK_URL em Config Vars
-- [ ] (Opcional) Configurar CTM_API_KEY em Config Vars
-- [ ] Definir Node 18+ e stack recomendada
-
-Qualidade/Engenharia
-- [ ] Adicionar testes básicos de mapeamento do builder (unit)
-- [ ] E2E feliz: preencher, anexar 2 fotos, enviar e verificar resposta 200
-- [ ] Configurar lint/format (ESLint/Prettier) conforme padrão do projeto
-- [ ] CI simples (build + type‑check) no provedor escolhido
+Fotos
+- [x] Compressão no cliente
+- [x] Captura de GPS (botão “Usar GPS”)
+- [ ] Validar contadores (ex.: 12 fotos 360°)
+- [ ] Avisos quando Cloudinary não estiver configurado e usuário esperar upload
 
 Documentação
-- [x] README com setup, envs e fluxo de envio
-- [ ] Adicionar guia de troubleshooting (Make/Heroku)
-- [ ] Checklist de publicação (pré‑release)
+- [x] README atualizado para Flask/Excel
+- [ ] Guia de troubleshooting (Excel aberto, CORS, offline)
+- [ ] Checklist de publicação
