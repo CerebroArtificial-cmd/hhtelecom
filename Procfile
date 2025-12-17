@@ -1,1 +1,1 @@
-web: next start -p $PORT --hostname 0.0.0.0
+web: cd server && gunicorn app:app --bind 0.0.0.0:$PORT

@@ -1,6 +1,9 @@
-﻿import ReportForm from '@/components/ui/ReportForm';
+﻿"use client";
 
-export default function Home() {
+import ReportForm from "@/components/ui/ReportForm";
+
+export default function RelatoriosPage() {
   return <ReportForm />;
 }
+
 

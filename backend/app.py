@@ -59,18 +59,129 @@ def append_dict_to_sheet(sheet_name: str, row: dict) -> None:
 
 # Chaves por seção/aba
 INFO_KEYS = [
-    "siteId","dataVisita","siteType","cidade","proprietario","telefone","representante",
-    "cand","cord","enderecoSite","bairro","cep"
+    "siteId",
+    "dataVisita",
+    "siteType",
+    "operadora",
+    "sharing",
+    "cidade",
+    "proprietario",
+    "telefone",
+    "representante",
+    "cand",
+    "cord",
+    "enderecoSite",
+    "endereco",
+    "bairro",
+    "cep",
+    "enderecoProprietario",
+    "enderecoProprietarioStatus",
+    "enderecoRepresentante",
+    "enderecoRepresentanteStatus",
+    "cepProprietario",
+    "cepRepresentante",
+    "cepRepresentanteStatus",
+    "telefoneProprietario",
+    "telefoneRepresentante",
+    "telefoneRepresentanteStatus",
+    "bairroProprietario",
+    "bairroRepresentante",
+    "bairroRepresentanteStatus",
+    "cidadeProprietario",
+    "cidadeRepresentante",
+    "cidadeRepresentanteStatus",
+    "estadoProprietario",
+    "estadoRepresentante",
+    "estadoRepresentanteStatus",
+    "tipoPessoa",
+    "relacaoProprietario",
+    "tipoPropriedade",
+    "estadoConservacao",
+    "edificacaoExistente",
+    "precisaDemolir",
+    "responsavelDemolicao",
+    "areaLivreUtilizada",
+    "dimensoesAreaDisponivel",
+    "tipoEntorno",
+    "supressaoVegetacao",
+    "responsavelSupressao",
+    "outraOperadora500m",
+    "proprietarioImovelEstrutura",
+    "operadorasRaio500m",
+    "restricaoAcesso",
+    "resumoNegociacao",
+    "observacoes",
 ]
 DOC_KEYS = [
     "iptuItr","escrituraParticular","contratoCompraVenda","matriculaCartorio","escrituraPublica",
     "inventario","contaConcessionaria","tempoDocumento","telefoneDoc","proposta","contraProposta","resumoHistorico"
 ]
 INFRA_KEYS = [
-    "terrenoPlano","arvoreArea","construcaoArea","medidasArea"
+    "equipamentosEdificacao",
+    "projetosEdificacaoDisponiveis",
+    "localizacaoSala",
+    "salaDesocupada",
+    "equipamentosPesadosProximos",
+    "arCondicionadoVentilacao",
+    "outrosProjetos",
+    "dimensoesSala",
+    "areaLivreDimensoes",
+    "numeroJanelasSala",
+    "equipamentoTopoEdificacao",
+    "alturaEdificacao",
+    "numeroPavimentos",
+    "plantasConstrucao",
+    "sistemaAterramentoCentral",
+    "numeroUnidades",
+    "numeroUnidadesDoisTercos",
+    "espacoEstocarEquipamentos",
+    "passagemCabo",
+    "localIndicado",
+    "terrenoPlano",
+    "arvoreArea",
+    "construcaoArea",
+    "medidasArea",
+]
+SECURITY_KEYS = [
+    "elevador",
+    "escada",
+    "utilizacaoGuindaste",
+    "aberto",
+    "especificacoesElevador",
+    "capacidadePeso",
+    "possibilidadeIcamento",
+    "estradaAcesso",
+    "larguraAcesso",
+    "comprimentoAcessoMelhoria",
+    "segurancaLocal",
+    "dimensoesPassagem",
+    "estacionamentoDisponivel",
+    "comentariosAdicionais",
+    "comentariosAdicionaisTexto",
+    "redeSaneamentoComentario",
+    "possibilidadeComentario",
+    "retiradaEdificacaoComentario",
+    "melhoriaAcessoComentario",
+    "limpezaImovelComentario",
 ]
 ELETRICOS_KEYS = [
-    "energia","energiaTipo","energiaVoltagem","extensaoRede","metrosExtensao","coordenadasPontoNominal"
+    "energia",
+    "energiaTipo",
+    "energiaVoltagem",
+    "extensaoRede",
+    "metrosExtensao",
+    "energiaOrigem",
+    "privadaPermiteUso",
+    "motivoExtensaoAdequacao",
+    "espacoGerador",
+    "adequacaoCentroMedicao",
+    "concessionariaEnergia",
+    "coordenadasPontoNominal",
+    "coordenadasTrafo",
+    "numeroTrafo",
+    "potenciaTrafo",
+    "numeroMedidor",
+    "coordenadasMedidor",
 ]
 CROQUI_KEYS = [
     "tamanhoTerreno","vegetacaoExistente","construcoesTerreno","acesso","niveisTerreno","observacoesGerais"
@@ -84,6 +195,19 @@ def pick(d: dict, keys: list[str]) -> dict:
     return {k: d.get(k, "") for k in keys if k in d}
 
 
+@app.get("/")
+def index_root():
+    return jsonify({
+        "ok": True,
+        "message": "API do Relatório de Visita Externa (Excel local)",
+        "endpoints": {
+            "GET /health": "Status do backend e Excel",
+            "GET /api/sheets": "Lista abas ou lê uma aba com ?name=",
+            "GET /api/sheets/<sheet_name>": "Lê uma aba específica",
+            "POST /api/relatorios": "Recebe e grava dados nas abas",
+            "GET /download/xlsx": "Baixar a planilha Excel"
+        }
+    })
 @app.get("/health")
 def health():
     return jsonify({"ok": True, "excel": str(EXCEL_PATH), "exists": EXCEL_PATH.exists()})
@@ -173,6 +297,10 @@ def salvar_relatorio():
         infra = pick(data, INFRA_KEYS)
         if infra:
             append_dict_to_sheet("Infraestrutura", {**common, **infra})
+        # Seguranca
+        security = pick(data, SECURITY_KEYS)
+        if security:
+            append_dict_to_sheet("Seguranca", {**common, **security})
         # Dados Eletricos e Medição
         eletr = pick(data, ELETRICOS_KEYS)
         if eletr:
@@ -207,3 +335,6 @@ def salvar_relatorio():
 if __name__ == "__main__":
     # Ex.: python backend/app.py
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+
+

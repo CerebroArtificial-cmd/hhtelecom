@@ -1,0 +1,12 @@
+model = "gpt-5.1-codex-max"
+model_reasoning_effort = "medium"
+
+[shell]
+program = "powershell.exe"
+args = ["-NoLogo", "-NoProfile", "-Command"]
+
+[server]
+working_dir = "."
+use_wsl = false
+log_level = "info"
+env = { LANG = "en_US.UTF-8", LC_ALL = "en_US.UTF-8" }

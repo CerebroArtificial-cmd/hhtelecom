@@ -21,7 +21,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
             id="tamanhoTerreno"
             value={data.tamanhoTerreno || ""}
             onChange={(e) => onChange("tamanhoTerreno", e.target.value)}
-            placeholder="Descreva as dimensões do terreno total e da área locada"
+            placeholder="Informe as dimensões do terreno total e da área locada"
             rows={3}
           />
         </div>
@@ -32,7 +32,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
             id="vegetacaoExistente"
             value={data.vegetacaoExistente || ""}
             onChange={(e) => onChange("vegetacaoExistente", e.target.value)}
-            placeholder="Dentro da área: indicar no Croqui e informar espécie. Fora da área: indicar e informar distância"
+            placeholder="Informe a vegetação existente. Dentro da área: indicar no Croqui e informar espécie. Fora da área: indicar e informar distância"
             rows={3}
           />
         </div>
@@ -43,7 +43,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
             id="construcoesTerreno"
             value={data.construcoesTerreno || ""}
             onChange={(e) => onChange("construcoesTerreno", e.target.value)}
-            placeholder="Dentro da área: indicar no Croqui todas as dimensões e localização. Fora da área: indicar e informar distância"
+            placeholder="Informe as construções no terreno. Dentro da área: indicar no Croqui todas as dimensões e localização. Fora da área: indicar e informar distância"
             rows={3}
           />
         </div>
@@ -54,7 +54,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
             id="acesso"
             value={data.acesso || ""}
             onChange={(e) => onChange("acesso", e.target.value)}
-            placeholder="Indicar acesso, informando largura e comprimento"
+            placeholder="Informe o acesso, com largura e comprimento"
             rows={2}
           />
         </div>
@@ -65,7 +65,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
             id="niveisTerreno"
             value={data.niveisTerreno || ""}
             onChange={(e) => onChange("niveisTerreno", e.target.value)}
-            placeholder="Indicar os níveis do terreno e da área locada em relação à rua"
+            placeholder="Informe os níveis do terreno e da área locada em relação à rua"
             rows={2}
           />
         </div>
@@ -76,7 +76,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
             id="observacoesGerais"
             value={data.observacoesGerais || ""}
             onChange={(e) => onChange("observacoesGerais", e.target.value)}
-            placeholder="Outras observações importantes sobre o site"
+            placeholder="Informe outras observações importantes sobre o site"
             rows={4}
           />
         </div>

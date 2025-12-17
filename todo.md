@@ -19,7 +19,7 @@ Frontend (Next.js)
 - [x] Exportar/Importar JSON
 - [ ] Spinner/feedback no botão Enviar
 - [ ] Acessibilidade (labels, aria-*, foco, contraste)
-- [ ] Responsividade mobile (inputs touch-friendly)
+- [x] Responsividade mobile (inputs touch-friendly)
 
 Fotos
 - [x] Compressão no cliente

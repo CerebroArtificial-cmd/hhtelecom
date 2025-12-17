@@ -1,5 +1,6 @@
-﻿# Run Next.js + Flask in Replit
-run = "bash -lc 'pip install -r backend/requirements.txt && npm install && npm run dev:full'"
+﻿run = "python server/app.py"
+language = "python3"
+entrypoint = "server/app.py"
 
 [env]
-PORT = "3000"
+PORT = "5000"

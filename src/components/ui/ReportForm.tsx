@@ -1,6 +1,4 @@
-﻿"use client";
-
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +7,7 @@ import { ReportData } from '@/types/report';
 import BasicInfo from './BasicInfo';
 import Documentation from './Documentation';
 import Infrastructure from './Infrastructure';
+import Security from './Security';
 import PhotoChecklist from './PhotoChecklist';
 import SketchSection from './SketchSection';
 import RulesSection from './RulesSection';
@@ -28,7 +27,10 @@ export default function ReportForm() {
 
   const [formData, setFormData] = useState<ReportData>({});
   const [activeTab, setActiveTab] = useState('inicio');
-  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
+  const [mounted, setMounted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const importRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -40,23 +42,20 @@ export default function ReportForm() {
         console.error('Erro ao carregar dados salvos:', error);
       }
     }
+    setMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (Object.keys(formData).length > 0) {
-      localStorage.setItem('visitReport', JSON.stringify(formData));
-    }
-  }, [formData]);
 
   useEffect(() => {
     const on = () => setIsOnline(true);
     const off = () => setIsOnline(false);
-    window.addEventListener('online', on);
-    window.addEventListener('offline', off);
-    return () => {
-      window.removeEventListener('online', on);
-      window.removeEventListener('offline', off);
-    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', on);
+      window.addEventListener('offline', off);
+      return () => {
+        window.removeEventListener('online', on);
+        window.removeEventListener('offline', off);
+      };
+    }
   }, []);
 
   const handleFieldChange = (
@@ -70,8 +69,10 @@ export default function ReportForm() {
   };
 
   const handleSave = () => {
+    setSaving(true);
     localStorage.setItem('visitReport', JSON.stringify(formData));
     toast.success('Relatório salvo com sucesso!');
+    setSaving(false);
   };
 
   const handleClear = async () => {
@@ -104,6 +105,7 @@ export default function ReportForm() {
   };
 
   const handleExport = async () => {
+    setExporting(true);
     try {
       const payload = await serializeForExport(formData);
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
@@ -120,6 +122,7 @@ export default function ReportForm() {
       console.error(e);
       toast.error('Falha ao exportar JSON.');
     }
+    setExporting(false);
   };
 
   const handleImportClick = () => {
@@ -203,9 +206,10 @@ export default function ReportForm() {
     return Math.round((filledFields / totalFields) * 100);
   };
 
-  const order = ["inicio", "documentation", "infrastructure", "photos", "rules", "sketch"] as const;
+  const order = ["inicio", "documentation", "infrastructure", "security", "photos", "rules", "sketch"] as const;
   const pct = getCompletionPercentage();
   const idx = order.indexOf(activeTab as any);
+  const isOnlineSafe = mounted ? isOnline : true;
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -215,35 +219,48 @@ export default function ReportForm() {
             <div>
               <CardTitle className="text-2xl">Relatório de Buscas</CardTitle>
               <p className="text-muted-foreground mt-1">Progresso: {pct}% completo</p>
-              {!isOnline && (
+              {!isOnlineSafe && (
                 <p className="text-xs text-amber-700 mt-1">Você está offline. É possível salvar/exportar, mas não enviar.</p>
               )}
             </div>
-            <div className="flex flex-wrap gap-2 justify-end">
-              <Button className="bg-[#054059] hover:bg-[#04364b] text-white w-full sm:w-auto" onClick={handleClear}>Limpar</Button>
-              <Button className="bg-[#03571f] hover:bg-[#024a1a] text-white w-full sm:w-auto" onClick={handleSave}>Salvar</Button>
-              <Button className="bg-[#77807a] hover:bg-[#5f6762] text-white w-full sm:w-auto" onClick={handleExport}>Exportar</Button>
-              <input ref={importRef} type="file" accept="application/json" className="hidden" onChange={handleImport} />
-              <Button className="bg-[#77807a] hover:bg-[#5f6762] text-white w-full sm:w-auto" onClick={handleImportClick}>Importar</Button>
+            <div className="flex flex-col sm:flex-row gap-2 justify-end">
               <Button
-                className={	ext-white w-full sm:w-auto }
-                onClick={handleSubmit}
-                disabled={idx < order.length - 1 || !isOnline}
+                type="button"
+                variant="outline"
+                onClick={handleClear}
               >
-                Enviar
+                Limpar
+              </Button>
+
+              <Button
+                type="button"
+                className="bg-[#D9452F] hover:bg-[#bf3a29] text-white"
+                onClick={handleSave}
+              >
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
+
+              <Button
+                type="button"
+                className="bg-[#0f766e] hover:bg-[#0c5f59] text-white"
+                onClick={handleExport}
+                disabled={exporting}
+              >
+                {exporting ? "Exportando..." : "Exportar"}
               </Button>
             </div>
           </div>
           <div className="mt-2 h-2 w-full bg-gray-200 rounded">
-            <div className="h-full rounded" style={{ width: ${pct}%, backgroundColor: "#77807a" }} />
+            <div className="h-full rounded" style={{ width: `${pct}%`, backgroundColor: "#77807a" }} />
           </div>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2">
               <TabsTrigger value="inicio">Informações</TabsTrigger>
               <TabsTrigger value="documentation">Documentação</TabsTrigger>
               <TabsTrigger value="infrastructure">Infraestrutura</TabsTrigger>
+              <TabsTrigger value="security">Seguran\u00e7a</TabsTrigger>
               <TabsTrigger value="photos">Fotos</TabsTrigger>
               <TabsTrigger value="rules">Observações</TabsTrigger>
               <TabsTrigger value="sketch">Croqui</TabsTrigger>
@@ -259,6 +276,10 @@ export default function ReportForm() {
 
             <TabsContent value="infrastructure">
               <Infrastructure data={formData} onChange={handleFieldChange} />
+            </TabsContent>
+
+            <TabsContent value="security">
+              <Security data={formData} onChange={handleFieldChange} />
             </TabsContent>
 
             <TabsContent value="photos">
@@ -284,7 +305,7 @@ export default function ReportForm() {
                     if (i > 0) setActiveTab(order[i - 1]);
                   }}
                 >Voltar</Button>
-                <Button className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto" onClick={handleSubmit} disabled={!isOnline}>Enviar</Button>
+                <Button className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto" onClick={handleSubmit} disabled={!isOnlineSafe}>Enviar</Button>
               </div>
             </div>
           ) : (
@@ -314,7 +335,3 @@ export default function ReportForm() {
     </div>
   );
 }
-
-
-
-

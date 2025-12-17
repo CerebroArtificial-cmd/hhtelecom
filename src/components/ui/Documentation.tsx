@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,7 +23,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
             id="iptuItr"
             value={data.iptuItr || ''}
             onChange={(e) => onChange('iptuItr', e.target.value)}
-            placeholder="Especificar IPTU ou ITR"
+            placeholder="Informe o IPTU ou ITR"
           />
         </div>
 
@@ -93,7 +93,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
             id="tempoDocumento"
             value={data.tempoDocumento || ''}
             onChange={(e) => onChange('tempoDocumento', e.target.value)}
-            placeholder="Ex: 2 anos, 6 meses"
+            placeholder="Informe o tempo de documento de compra e venda"
           />
         </div>
 
@@ -104,7 +104,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
               id="telefoneDoc"
               value={data.telefoneDoc || ''}
               onChange={(e) => onChange('telefoneDoc', e.target.value)}
-              placeholder="Telefone para documentação"
+              placeholder="Informe o telefone para documentação"
             />
           </div>
 
@@ -114,7 +114,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
               id="proposta"
               value={data.proposta || ''}
               onChange={(e) => onChange('proposta', e.target.value)}
-              placeholder="Valor da proposta"
+              placeholder="Informe o valor da proposta"
             />
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
             id="contraProposta"
             value={data.contraProposta || ''}
             onChange={(e) => onChange('contraProposta', e.target.value)}
-            placeholder="Valor da contra proposta"
+            placeholder="Informe o valor da contra proposta"
           />
         </div>
 
@@ -135,7 +135,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
             id="resumoHistorico"
             value={data.resumoHistorico || ''}
             onChange={(e) => onChange('resumoHistorico', e.target.value)}
-            placeholder="Descreva o histórico do imóvel"
+            placeholder="Informe o histórico do imóvel"
             rows={3}
           />
         </div>
@@ -143,4 +143,3 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
     </Card>
   );
 }
-

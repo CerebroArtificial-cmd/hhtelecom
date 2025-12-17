@@ -1,0 +1,303 @@
+# server/app.py
+from flask import Flask, request, jsonify
+import json, sqlite3
+import pandas as pd
+import pytz
+from datetime import datetime
+import gspread
+import unicodedata
+import re
+from google.oauth2.service_account import Credentials
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+SHEET_ID = os.getenv("SHEET_ID")
+API_KEY  = os.getenv("API_KEY", "chave_super_segura_12345") 
+
+
+app = Flask(__name__)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, "service_account.json")
+
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+]
+
+TZ = pytz.timezone("America/Sao_Paulo")
+
+
+print("SERVICE_ACCOUNT_FILE:", SERVICE_ACCOUNT_FILE)
+print("Existe?", os.path.exists(SERVICE_ACCOUNT_FILE))
+
+
+creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+gc = gspread.authorize(creds)
+sh = gc.open_by_key(SHEET_ID)
+
+def resolve_worksheet(title_or_gid: str):
+    if title_or_gid.isdigit():
+        return sh.get_worksheet_by_id(int(title_or_gid))
+    try:
+        return sh.worksheet(title_or_gid)
+    except gspread.exceptions.WorksheetNotFound:
+        raise
+
+def headers_for(sheet_name_or_gid: str):
+    ws = resolve_worksheet(sheet_name_or_gid.strip())
+    return ws.row_values(1), ws
+
+def df_from_sheet(sheet_name_or_gid: str):
+    ws = resolve_worksheet(sheet_name_or_gid.strip())
+    records = ws.get_all_records()
+    import pandas as pd
+    return pd.DataFrame(records)
+
+
+
+def check_api_key(req) -> bool:
+    if not API_KEY:
+        return True
+    return req.headers.get("X-API-Key") == API_KEY
+
+
+IDEMP_DB = os.getenv("IDEMP_DB") or os.path.join(BASE_DIR, "idempotency.db")
+
+def idem_conn():
+    conn = sqlite3.connect(IDEMP_DB)
+    conn.execute("CREATE TABLE IF NOT EXISTS seen (key TEXT PRIMARY KEY)")
+    return conn
+
+def already_seen(key: str) -> bool:
+    if not key:
+        return False
+    conn = idem_conn()
+    try:
+        cur = conn.execute("SELECT 1 FROM seen WHERE key=?", (key,))
+        return cur.fetchone() is not None
+    finally:
+        conn.close()
+
+def mark_seen(key: str):
+    if not key:
+        return
+    conn = idem_conn()
+    try:
+        conn.execute("INSERT OR IGNORE INTO seen(key) VALUES (?)", (key,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+TRUE_SET  = {"sim","true","verdadeiro","1","yes","y","on"}
+FALSE_SET = {"não","nao","false","falso","0","no","n","off"}
+
+def normalize_value(v):
+    if v is None:
+        return None
+    if isinstance(v, str):
+        s = v.strip()
+        if not s:
+            return None
+        low = s.lower()
+        if low in TRUE_SET: return True
+        if low in FALSE_SET: return False
+        return s
+    return v  
+
+def append_in_chunks(ws, values, chunk_size=200):
+    total = len(values)
+    if total == 0:
+        return 0
+    appended = 0
+    for i in range(0, total, chunk_size):
+        batch = values[i:i+chunk_size]
+        ws.append_rows(batch, value_input_option="USER_ENTERED")
+        appended += len(batch)
+    return appended
+
+
+@app.get("/")
+def index():
+    return jsonify({
+        "ok": True,
+        "message": "API do Relatório de Visita Externa",
+        "endpoints": {
+            "GET /health": "Status e lista de abas",
+            "GET /schema": "Cabeçalhos (linha 1) de cada aba",
+            "GET /dados?sheet=Nome%20da%20Aba": "Lê os dados de uma aba",
+            "GET /dados_all": "Lê os dados de todas as abas",
+            "POST /ingest_bulk": "Insere em lote nas abas"
+        }
+    })
+
+@app.get("/health")
+def health():
+    try:
+        return jsonify({
+            "ok": True,
+            "worksheets": [w.title for w in sh.worksheets()],
+            "server_time": datetime.now(TZ).isoformat()
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "erro": type(e).__name__, "detalhe": str(e)}), 500
+
+@app.get("/schema")
+def schema():
+    try:
+        data = {ws.title: ws.row_values(1) for ws in sh.worksheets()}
+        return jsonify({"ok": True, "schema": data})
+    except Exception as e:
+        return jsonify({"ok": False, "erro": type(e).__name__, "detalhe": str(e)}), 500
+
+@app.get("/dados")
+def dados():
+    sheet = request.args.get("sheet")
+    if not sheet:
+        return jsonify({"ok": False, "erro": "Informe ?sheet=Nome da Aba"}), 400
+    try:
+        df = df_from_sheet(sheet)
+        return jsonify({"ok": True, "sheet": sheet, "rows": len(df), "data": df.to_dict(orient="records")})
+    except gspread.exceptions.WorksheetNotFound:
+        return jsonify({"ok": False, "erro": "WorksheetNotFound", "detalhe": f"A aba '{sheet}' não existe."}), 404
+    except Exception as e:
+        return jsonify({"ok": False, "erro": type(e).__name__, "detalhe": str(e)}), 500
+
+@app.get("/dados_all")
+def dados_all():
+    try:
+        out = {}
+        for ws in sh.worksheets():
+            out[ws.title] = ws.get_all_records()
+        return jsonify({"ok": True, "sheets": list(out.keys()), "data": out})
+    except Exception as e:
+        return jsonify({"ok": False, "erro": type(e).__name__, "detalhe": str(e)}), 500
+
+@app.get("/debug_sheets")
+def debug_sheets():
+    try:
+        return jsonify({
+            "ok": True,
+            "sheet_id": sh.id,
+            "worksheets": [{"title": ws.title, "gid": ws.id} for ws in sh.worksheets()]
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "erro": type(e).__name__, "detalhe": str(e)}), 500
+
+
+@app.post("/ingest_bulk")
+def ingest_bulk():
+    if not check_api_key(request):
+        return jsonify({"ok": False, "erro": "unauthorized"}), 401
+
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict) or "sheets" not in payload:
+        return jsonify({
+            "ok": False,
+            "erro": "payload_invalido",
+            "detalhe": "Esperado { batch_id?, device_id?, user_id?, captured_at?, sheets:{<Aba>:[{...}]}}"
+        }), 400
+
+    batch_id    = payload.get("batch_id")
+    device_id   = payload.get("device_id")
+    user_id     = payload.get("user_id")
+    captured_at = payload.get("captured_at")
+    sheets_map  = payload.get("sheets", {})
+
+    if batch_id and already_seen(f"batch:{batch_id}"):
+        return jsonify({"ok": True, "duplicated_batch": True, "results": {
+            "batch_id": batch_id, "accepted": 0, "duplicates": 0, "errors": 0, "by_sheet": {}
+        }})
+
+    server_synced_at = datetime.now(TZ).isoformat()
+    results = {"batch_id": batch_id, "accepted": 0, "duplicates": 0, "errors": 0, "by_sheet": {}}
+
+    try:
+        for sheet_name, rows in sheets_map.items():
+            if not isinstance(rows, list) or not rows:
+                continue
+
+            try:
+                headers, ws = headers_for(sheet_name)
+            except Exception:
+                results["by_sheet"][sheet_name] = [{"error": "WorksheetNotFound"}] * len(rows)
+                results["errors"] += len(rows)
+                continue
+
+            values_to_append, line_results = [], []
+
+            for r in rows:
+                line_key = r.get("idempotency_key")
+                if line_key and already_seen(f"line:{line_key}"):
+                    line_results.append({"idempotency_key": line_key, "status": "duplicate"})
+                    results["duplicates"] += 1
+                    continue
+
+                r = dict(r)  # cópia para não mutar caller
+                r.setdefault("_device_id", device_id)
+                r.setdefault("_user_id", user_id)
+                r.setdefault("_captured_at", captured_at)
+                r.setdefault("_server_synced_at", server_synced_at)
+
+                row_values = [normalize_value(r.get(h)) for h in headers]
+                values_to_append.append(row_values)
+                line_results.append({"idempotency_key": line_key, "status": "queued"})
+
+            appended = append_in_chunks(ws, values_to_append, chunk_size=200)
+            results["accepted"] += appended
+
+            for lr in line_results:
+                if lr.get("status") == "queued" and lr.get("idempotency_key"):
+                    mark_seen(f"line:{lr['idempotency_key']}")
+
+            results["by_sheet"][sheet_name] = line_results
+
+        if batch_id:
+            mark_seen(f"batch:{batch_id}")
+
+        return jsonify({"ok": True, "results": results})
+
+    except Exception as e:
+        return jsonify({"ok": False, "erro": type(e).__name__, "detalhe": str(e)}), 500
+
+@app.post("/ingest_bulk/FotosChecklist")
+def ingest_fotos_checklist_bulk():
+    if not check_api_key(request):
+        return jsonify({"ok": False, "erro": "unauthorized"}), 401
+
+    body = request.get_json(silent=True) or {}
+    
+    rows = body.get("rows")
+    if not isinstance(rows, list) or not rows:
+        return jsonify({
+            "ok": False,
+            "erro": "payload_invalido",
+            "detalhe": "Esperado { rows: [ {...}, ... ] }"
+        }), 400
+
+    payload = {
+        "batch_id": body.get("batch_id"),
+        "device_id": body.get("device_id"),
+        "user_id": body.get("user_id"),
+        "captured_at": body.get("captured_at"),
+        "sheets": {
+            "Fotos Checklist": rows
+        }
+    }
+    
+    with app.test_request_context(json=payload, headers=request.headers):
+        return ingest_bulk()
+
+
+if __name__ == "__main__":
+    try:
+        print("Diretório atual:", os.getcwd())
+        print("Arquivo JSON existe?", os.path.exists(SERVICE_ACCOUNT_FILE))
+        _titles = [w.title for w in sh.worksheets()]
+        print("Abas encontradas:", _titles)
+    except Exception as e:
+        print("Falha ao inicializar Sheets:", type(e).__name__, str(e))
+    app.run(host="0.0.0.0", port=5000, debug=True)
