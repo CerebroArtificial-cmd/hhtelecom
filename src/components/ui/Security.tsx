@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,7 +53,7 @@ export default function Security({ data, onChange }: SecurityProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>CONDIÃ‡Ã•ES DE ACESSO E SEGURANÃ‡A</CardTitle>
+        <CardTitle>Condições de acesso e segurança
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
