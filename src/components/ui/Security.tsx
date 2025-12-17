@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+﻿import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,7 +44,7 @@ export default function Security({ data, onChange }: SecurityProps) {
         </div>
         <div className="flex items-center space-x-2">
           <Checkbox id={`${field}-nao`} checked={getValue(field) === 'NAO'} onCheckedChange={(c) => onChange(field, c ? 'NAO' : '')} />
-          <Label htmlFor={`${field}-nao`}>NÃO</Label>
+          <Label htmlFor={`${field}-nao`}>NÃƒO</Label>
         </div>
       </div>
     </div>
@@ -53,20 +53,20 @@ export default function Security({ data, onChange }: SecurityProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>CONDIÇÕES DE ACESSO E SEGURANÇA</CardTitle>
+        <CardTitle>CONDIÃ‡Ã•ES DE ACESSO E SEGURANÃ‡A</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
           {renderYesNo('elevador', 'Elevador?')}
           {renderYesNo('escada', 'Escada?')}
-          {renderYesNo('utilizacaoGuindaste', 'Possível utilização de guindaste?')}
+          {renderYesNo('utilizacaoGuindaste', 'PossÃ­vel utilizaÃ§Ã£o de guindaste?')}
           {renderYesNo('aberto', 'Aberto?')}
 
-          {renderInputWithNa('especificacoesElevador', 'Especificações do elevador', 'Informe as especificações do elevador')}
+          {renderInputWithNa('especificacoesElevador', 'EspecificaÃ§Ãµes do elevador', 'Informe as especificaÃ§Ãµes do elevador')}
 
           {renderInputWithNa('capacidadePeso', 'Capacidade de peso', 'Informe a capacidade de peso')}
 
-          {renderInputWithNa('possibilidadeIcamento', 'Possibilidade de içamento de equipamento?', 'Informe a possibilidade de içamento')}
+          {renderInputWithNa('possibilidadeIcamento', 'Possibilidade de iÃ§amento de equipamento?', 'Informe a possibilidade de iÃ§amento')}
 
           {renderYesNo('estradaAcesso', 'Estrada de acesso existente?')}
 
@@ -82,12 +82,12 @@ export default function Security({ data, onChange }: SecurityProps) {
 
           {renderInputWithNa(
             'comprimentoAcessoMelhoria',
-            'Se não, determinar comprimento de acesso/melhoria',
+            'Se nÃ£o, determinar comprimento de acesso/melhoria',
             'Informe o comprimento de acesso/melhoria'
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="segurancaLocal">Segurança do local</Label>
+            <Label htmlFor="segurancaLocal">SeguranÃ§a do local</Label>
             <select
               id="segurancaLocal"
               className={selectClassName}
@@ -95,31 +95,31 @@ export default function Security({ data, onChange }: SecurityProps) {
               onChange={(e) => onChange('segurancaLocal', e.target.value)}
             >
               <option value="">Selecione</option>
-              <option value="PUBLICA">Pública</option>
+              <option value="PUBLICA">PÃºblica</option>
               <option value="PRIVADA">Privada</option>
             </select>
           </div>
 
           {renderInputWithNa(
             'dimensoesPassagem',
-            'Dimensões (metros) H x L x C - passagem H x L',
-            'Informe as dimensões da passagem'
+            'DimensÃµes (metros) H x L x C - passagem H x L',
+            'Informe as dimensÃµes da passagem'
           )}
 
-          {renderYesNo('estacionamentoDisponivel', 'Estacionamento disponível?')}
+          {renderYesNo('estacionamentoDisponivel', 'Estacionamento disponÃ­vel?')}
         </div>
 
         <div className="space-y-4">
-          <div className="text-sm font-semibold">Comentários adicionais</div>
-          {renderYesNo('comentariosAdicionais', 'Comentários adicionais')}
+          <div className="text-sm font-semibold">ComentÃ¡rios adicionais</div>
+          {renderYesNo('comentariosAdicionais', 'ComentÃ¡rios adicionais')}
 
           <div className="space-y-2">
-            <Label htmlFor="comentariosAdicionaisTexto">Comentários adicionais</Label>
+            <Label htmlFor="comentariosAdicionaisTexto">ComentÃ¡rios adicionais</Label>
             <Input
               id="comentariosAdicionaisTexto"
               value={getValue('comentariosAdicionaisTexto') || ''}
               onChange={(e) => onChange('comentariosAdicionaisTexto', e.target.value)}
-              placeholder="Informe os comentários adicionais"
+              placeholder="Informe os comentÃ¡rios adicionais"
             />
           </div>
         </div>
