@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -71,7 +71,7 @@ export default function ReportForm() {
   const handleSave = () => {
     setSaving(true);
     localStorage.setItem('visitReport', JSON.stringify(formData));
-    toast.success('RelatÃ³rio salvo com sucesso!');
+    toast.success('Relatório salvo com sucesso!');
     setSaving(false);
   };
 
@@ -148,7 +148,7 @@ export default function ReportForm() {
 
   const handleSubmit = async () => {
     if (!isOnline) {
-      toast.error('VocÃª estÃ¡ offline. Envio indisponÃ­vel.');
+      toast.error('Você está offline. Envio indisponível.');
       return;
     }
     try {
@@ -176,14 +176,14 @@ export default function ReportForm() {
       });
       if (!res.ok) {
         const text = await res.text();
-        toast.error('Falha ao enviar relatÃ³rio');
+        toast.error('Falha ao enviar Relatório');
         console.error('Backend error:', res.status, text);
         return;
       }
-      toast.success('RelatÃ³rio enviado com sucesso!');
+      toast.success('Relatório enviado com sucesso!');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao enviar. Verifique sua conexÃ£o.');
+      toast.error('Erro ao enviar. Verifique sua conexão.');
     }
   };
 
@@ -217,10 +217,10 @@ export default function ReportForm() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle className="text-2xl">RelatÃ³rio de Buscas</CardTitle>
+              <CardTitle className="text-2xl">Relatório de Buscas</CardTitle>
               <p className="text-muted-foreground mt-1">Progresso: {pct}% completo</p>
               {!isOnlineSafe && (
-                <p className="text-xs text-amber-700 mt-1">VocÃª estÃ¡ offline. Ã‰ possÃ­vel salvar/exportar, mas nÃ£o enviar.</p>
+                <p className="text-xs text-amber-700 mt-1">Você está offline. É possível salvar/exportar, mas não enviar.</p>
               )}
             </div>
             <div className="flex flex-col sm:flex-row gap-2 justify-end">
@@ -257,12 +257,12 @@ export default function ReportForm() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2">
-              <TabsTrigger value="inicio">InformaÃ§Ãµes</TabsTrigger>
-              <TabsTrigger value="documentation">DocumentaÃ§Ã£o</TabsTrigger>
+              <TabsTrigger value="inicio">Informações</TabsTrigger>
+              <TabsTrigger value="documentation">Documentação</TabsTrigger>
               <TabsTrigger value="infrastructure">Infraestrutura</TabsTrigger>
               <TabsTrigger value="security">Segurança</TabsTrigger>
               <TabsTrigger value="photos">Fotos</TabsTrigger>
-              <TabsTrigger value="rules">ObservaÃ§Ãµes</TabsTrigger>
+              <TabsTrigger value="rules">Observações</TabsTrigger>
               <TabsTrigger value="sketch">Croqui</TabsTrigger>
             </TabsList>
 
@@ -297,7 +297,7 @@ export default function ReportForm() {
 
           {activeTab === 'sketch' ? (
             <div className="flex justify-between items-center pt-6">
-              <p className="text-sm text-muted-foreground">Revise os dados (nÃ£o Ã© obrigatÃ³rio preencher todos os campos) e envie o relatÃ³rio para a planilha.</p>
+              <p className="text-sm text-muted-foreground">Revise os dados (não é obrigatório preencher todos os campos) e envie o Relatório para a planilha.</p>
               <div className="flex flex-wrap gap-2 justify-end">
                 <Button variant="outline" className="w-full sm:w-auto"
                   onClick={() => {
@@ -310,7 +310,7 @@ export default function ReportForm() {
             </div>
           ) : (
             <div className="flex justify-between items-center pt-6">
-              <p className="text-sm text-muted-foreground">Os dados sÃ£o salvos automaticamente no seu navegador. VocÃª pode prosseguir sem preencher todos os campos.</p>
+              <p className="text-sm text-muted-foreground">Os dados são salvos automaticamente no seu navegador. Você pode prosseguir sem preencher todos os campos.</p>
               <div className="flex flex-wrap gap-2 justify-end">
                 {idx > 0 && (
                   <Button variant="outline" className="w-full sm:w-auto"
@@ -326,7 +326,7 @@ export default function ReportForm() {
                     if (i < order.length - 1) setActiveTab(order[i + 1]);
                   }}
                   disabled={order.indexOf(activeTab as any) >= order.length - 1}
-                >PrÃ³ximo</Button>
+                >Próximo</Button>
               </div>
             </div>
           )}
