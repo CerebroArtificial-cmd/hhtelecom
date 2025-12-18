@@ -1,5 +1,5 @@
-﻿export type PhotoEntry = {
-  files?: File[]; // usado no client (não enviar pro backend)
+export type PhotoEntry = {
+  files?: File[]; // usado no client (nao enviar pro backend)
   urls?: string[]; // dataURL (offline) ou URL gerada no envio
   coordsText?: string; // "-23.550520, -46.633310"
   coords?: { lat: number; lng: number };
@@ -7,179 +7,48 @@
 
 export type PhotosUploads = Record<string, PhotoEntry>;
 
-
-/**
- * Dados principais do relatório mapeados 1:1 com o checklist.
- * Campos de duas opções geralmente são radios ("sim" | "nao").
- * Campos com múltiplas opções são arrays (ex.: energiaTipo, energiaVoltagem).
- */
-export type ReportData = {
-  // ========================
-  // INFORMAÇÕES INICIAIS
-  // ========================
-  siteType?: "greenfield" | "rooftop"; // Greenfield / Rooftop
-  operadora?: string;                  // Operadora
-  sharing?: string;                    // Sharing
-  cidade?: string;                     // CIDADE
-  proprietario?: string;               // PROPRIETÁRIO
-  telefone?: string;                   // TEL (geral)
-  cand?: string;                       // CAND
-  cord?: string;                       // CORD
-  endereco?: string;                   // ENDEREÇO
-  enderecoSite?: string;               // ENDEREÇO DO SITE
-  bairro?: string;                     // BAIRRO
-  representante?: string;              // REPRESENTANTE
-
-  siteId?: string;                     // ID do site
-  dataVisita?: string;                 // Data da visita (DD/MM/AAAA)
-  cep?: string;                        // CEP
-  // ========================
-  // DADOS DO CLIENTE (HUNTER) — Proprietário/Representante com N/I e N/A
-  // ========================
-  // status helpers
-  // src/types/report.ts
-
-export type Status = "INFORMAR" | "NI" | "NA";
-
 export interface ReportData {
-  /* ===================== DADOS GERAIS ===================== */
+  [key: string]: any;
   siteId?: string;
   dataVisita?: string;
   hunter?: string;
   operadora?: string;
   sharing?: string;
   searchingRing?: "SIM" | "NAO";
-
   siteType?: "greenfield" | "rooftop";
-
   cidade?: string;
   telefone?: string;
-
   proprietario?: string;
   representante?: string;
-
   cand?: string;
   cord?: string;
-
   enderecoSite?: string;
   bairro?: string;
   cep?: string;
 
-  /* ===================== STATUS (N/I | N/A) ===================== */
-  enderecoProprietarioStatus?: "INFORMAR" | "NI";
-  enderecoRepresentanteStatus?: Status;
-  cepRepresentanteStatus?: Status;
-  telefoneRepresentanteStatus?: Status;
-  bairroRepresentanteStatus?: Status;
-  cidadeRepresentanteStatus?: Status;
-  estadoRepresentanteStatus?: Status;
-
-  /* ===================== PROPRIETÁRIO ===================== */
-  enderecoProprietario?: string;
-  cepProprietario?: string;
-  telefoneProprietario?: string;
-  bairroProprietario?: string;
-  cidadeProprietario?: string;
-  estadoProprietario?: string;
-
-  /* ===================== REPRESENTANTE ===================== */
-  enderecoRepresentante?: string;
-  cepRepresentante?: string;
-  telefoneRepresentante?: string;
-  bairroRepresentante?: string;
-  cidadeRepresentante?: string;
-  estadoRepresentante?: string;
-
-  /* ===================== DROPDOWNS ===================== */
-  tipoPessoa?: "FISICA" | "JURIDICA" | "ORGAO_PUBLICO";
-  relacaoProprietario?: "IRMAO" | "FILHO" | "PRIMO" | "OUTRO" | "NA";
-  tipoPropriedade?: "TERRENO_URBANO" | "TERRENO_RURAL" | "AREA_PUBLICA" | "TOPO_PREDIO_SOBRADO";
-  estadoConservacao?: "BOM" | "REGULAR" | "PESSIMO";
-
-  /* ===================== RADIOS ===================== */
-  edificacaoExistente?: "SIM" | "NAO";
-  precisaDemolir?: "SIM" | "NAO" | "NA";
-  responsavelDemolicao?: "LOCADOR" | "SHARING" | "NA";
-  areaLivreUtilizada?: "SIM" | "NAO" | "NA";
-  dimensoesAreaDisponivel?: string;
-  tipoEntorno?: "COMERCIAL" | "RESIDENCIAL" | "INDUSTRIAL" | "MISTO" | "OUTRO";
-  supressaoVegetacao?: "SIM" | "NAO";
-  responsavelSupressao?: "LOCADOR" | "SHARING" | "NA";
-  outraOperadora500m?: "SIM" | "NAO";
-  proprietarioImovelEstrutura?: "SIM" | "NAO";
-  operadorasRaio500m?: "TIM" | "CLARO" | "VIVO" | "OI" | "OUTRA" | "NA";
-  restricaoAcesso?: string;
-  resumoNegociacao?: string;
-  observacoes?: string;
-
-  /* ===================== INFRAESTRUTURA ===================== */
-  equipamentosEdificacao?: string;
-  projetosEdificacaoDisponiveis?: string;
-  localizacaoSala?: string;
-  salaDesocupada?: string;
-  equipamentosPesadosProximos?: string;
-  arCondicionadoVentilacao?: string;
-  outrosProjetos?: string;
-  dimensoesSala?: string;
-  areaLivreDimensoes?: string;
-  numeroJanelasSala?: string;
-  equipamentoTopoEdificacao?: string;
-  alturaEdificacao?: string;
-  numeroPavimentos?: string;
-  plantasConstrucao?: string;
-  sistemaAterramentoCentral?: string;
-  numeroUnidades?: string;
-  numeroUnidadesDoisTercos?: string;
-  espacoEstocarEquipamentos?: string;
-  passagemCabo?: string;
-  localIndicado?: string;
-  terrenoPlano?: string;
-  arvoreArea?: string;
-  construcaoArea?: string;
-  medidasArea?: string;
+  // Documentacao
+  iptu?: boolean;
+  itr?: boolean;
+  iptuItr?: string;
+  escrituraParticular?: boolean;
+  contratoCompraVenda?: boolean;
+  matriculaCartorio?: boolean;
+  escrituraPublica?: boolean;
+  inventario?: boolean;
+  contaConcessionaria?: boolean;
+  tempoDocumento?: string;
+  telefoneDoc?: string;
+  proposta?: string;
+  contraProposta?: string;
   resumoHistorico?: string;
-  coordenadasPontoNominal?: string;
-  energia?: string;
-  energiaTipo?: string[];
-  energiaVoltagem?: string;
-  extensaoRede?: string;
-  metrosExtensao?: string;
-  energiaOrigem?: string;
-  privadaPermiteUso?: string;
-  motivoExtensaoAdequacao?: string;
-  numeroTrafo?: string;
-  potenciaTrafo?: string;
-  numeroMedidor?: string;
-  espacoGerador?: string;
-  adequacaoCentroMedicao?: string;
-  concessionariaEnergia?: string;
-  coordenadasTrafo?: string;
-  coordenadasMedidor?: string;
+  docFoto1?: string;
+  docFoto2?: string;
+  docFoto3?: string;
+  docFoto4?: string;
 
-  /* ===================== SEGURANCA ===================== */
-  elevador?: string;
-  escada?: string;
-  utilizacaoGuindaste?: string;
-  aberto?: string;
-  especificacoesElevador?: string;
-  capacidadePeso?: string;
-  possibilidadeIcamento?: string;
-  estradaAcesso?: string;
-  larguraAcesso?: string;
-  comprimentoAcessoMelhoria?: string;
-  segurancaLocal?: "PUBLICA" | "PRIVADA";
-  dimensoesPassagem?: string;
-  estacionamentoDisponivel?: string;
-  comentariosAdicionais?: string;
-  comentariosAdicionaisTexto?: string;
-  redeSaneamentoComentario?: string;
-  possibilidadeComentario?: string;
-  retiradaEdificacaoComentario?: string;
-  melhoriaAcessoComentario?: string;
-  limpezaImovelComentario?: string;
+  photosUploads?: PhotosUploads;
 }
 
-/* ===================== DEFAULTS ===================== */
 export const emptyReportData: ReportData = {
   siteId: "",
   dataVisita: "",
@@ -187,77 +56,29 @@ export const emptyReportData: ReportData = {
   operadora: "",
   sharing: "",
   searchingRing: undefined,
-
   siteType: undefined,
-
   cidade: "",
   telefone: "",
   proprietario: "",
   representante: "",
-
   cand: "",
   cord: "",
-
   enderecoSite: "",
   bairro: "",
   cep: "",
-
-  // status defaults
-  enderecoProprietarioStatus: "INFORMAR",
-  enderecoRepresentanteStatus: "INFORMAR",
-  cepRepresentanteStatus: "INFORMAR",
-  telefoneRepresentanteStatus: "INFORMAR",
-  bairroRepresentanteStatus: "INFORMAR",
-  cidadeRepresentanteStatus: "INFORMAR",
-  estadoRepresentanteStatus: "INFORMAR",
-
-  // proprietário
-  enderecoProprietario: "",
-  cepProprietario: "",
-  telefoneProprietario: "",
-  bairroProprietario: "",
-  cidadeProprietario: "",
-  estadoProprietario: "",
-
-  // representante
-  enderecoRepresentante: "",
-  cepRepresentante: "",
-  telefoneRepresentante: "",
-  bairroRepresentante: "",
-  cidadeRepresentante: "",
-  estadoRepresentante: "",
-
-  // dropdowns / radios
-  tipoPessoa: undefined,
-  relacaoProprietario: undefined,
-  tipoPropriedade: undefined,
-  estadoConservacao: undefined,
-
-  edificacaoExistente: undefined,
-  precisaDemolir: undefined,
+  iptu: false,
+  itr: false,
+  iptuItr: "",
+  docFoto1: "",
+  docFoto2: "",
+  docFoto3: "",
+  docFoto4: "",
 };
 
-/* ===================== VALIDAÇÃO ===================== */
 export function validateReport(data: ReportData): string[] {
   const errors: string[] = [];
-
-  // gerais (se quiser manter)
   if (!data.siteType) errors.push("Tipo de site");
   if (!data.cidade) errors.push("Cidade");
-  if (!data.proprietario) errors.push("Proprietário");
-
-  // obrigatórios do cliente
-  if (!data.cepProprietario) errors.push("CEP do proprietário");
-  if (!data.telefoneProprietario) errors.push("Telefone do proprietário");
-  if (!data.bairroProprietario) errors.push("Bairro do proprietário");
-  if (!data.cidadeProprietario) errors.push("Cidade do proprietário");
-  if (!data.estadoProprietario) errors.push("Estado do proprietário");
-
-  if (!data.tipoPessoa) errors.push("Tipo de pessoa");
-  if (!data.tipoPropriedade) errors.push("Tipo de propriedade");
-
-  if (!data.edificacaoExistente) errors.push("Edificação existente");
-  if (!data.precisaDemolir) errors.push("Precisa ser demolida");
-
+  if (!data.proprietario) errors.push("Proprietario");
   return errors;
 }

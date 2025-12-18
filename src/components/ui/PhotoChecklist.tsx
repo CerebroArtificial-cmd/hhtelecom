@@ -120,6 +120,7 @@ function blobToFile(blob: Blob, name = "photo.jpg"): File {
 export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) {
   const photos = (data as any).photosUploads || {};
   const [isOnline, setIsOnline] = React.useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [photoView, setPhotoView] = React.useState<"gf" | "rt" | "360">("gf");
   React.useEffect(() => {
     const on = () => setIsOnline(true);
     const off = () => setIsOnline(false);
@@ -289,10 +290,36 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const visibleFields = photoFields.filter((item) =>
+    photoView === "360" ? IS_360.has(item.id) : !IS_360.has(item.id)
+  );
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Checklist de Fotos</CardTitle>
+          <div className="flex flex-wrap justify-center gap-3">
+          <Button
+            type="button"
+            className="bg-[#760406] text-[#f8f8f8] hover:bg-[#5f0304] text-lg sm:text-xl font-semibold"
+            onClick={() => setPhotoView("gf")}
+          >
+            Fotos GF
+          </Button>
+          <Button
+            type="button"
+            className="bg-[#760406] text-[#f8f8f8] hover:bg-[#5f0304] text-lg sm:text-xl font-semibold"
+            onClick={() => setPhotoView("rt")}
+          >
+            Fotos RT
+          </Button>
+          <Button
+            type="button"
+            className="bg-[#760406] text-[#f8f8f8] hover:bg-[#5f0304] text-lg sm:text-xl font-semibold"
+            onClick={() => setPhotoView("360")}
+          >
+            Fotos 360
+          </Button>
+        </div>
         <p className="text-sm text-gray-600">
           <strong>OBS.:</strong> Sempre demarcar a área locada com <em>tira zebrada</em>.
         </p>
@@ -308,7 +335,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
 
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {photoFields.map((item) => {
+          {visibleFields.map((item) => {
             const entry: PhotoEntry = photos[item.id] || {};
 
             if (IS_360.has(item.id)) {

@@ -11,19 +11,52 @@ interface DocumentationProps {
 }
 
 export default function Documentation({ data, onChange }: DocumentationProps) {
+  const fileInputClassName =
+    'block w-full cursor-pointer rounded-md border border-gray-300 bg-white p-1 text-xs file:mr-2 file:rounded file:border-0 file:bg-[#77807a] file:hover:bg-[#5f6762] file:px-2 file:py-1 file:text-white';
+
+  const handleDocPhoto = (field: string, fileList: FileList | null) => {
+    const file = fileList && fileList[0] ? fileList[0] : undefined;
+    if (!file) {
+      onChange(field, '');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => onChange(field, String(reader.result || ''));
+    reader.onerror = () => onChange(field, '');
+    reader.readAsDataURL(file);
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Documentação</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Documentacao</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="iptuItr">IPTU ou ITR?</Label>
+          <Label>IPTU ou ITR?</Label>
+          <div className="flex space-x-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="iptu"
+                checked={data.iptu || false}
+                onCheckedChange={(checked) => onChange('iptu', checked as boolean)}
+              />
+              <Label htmlFor="iptu">IPTU</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="itr"
+                checked={data.itr || false}
+                onCheckedChange={(checked) => onChange('itr', checked as boolean)}
+              />
+              <Label htmlFor="itr">ITR</Label>
+            </div>
+          </div>
           <Input
             id="iptuItr"
             value={data.iptuItr || ''}
             onChange={(e) => onChange('iptuItr', e.target.value)}
-            placeholder="Informe o IPTU ou ITR"
+            placeholder="Observacoes"
           />
         </div>
 
@@ -53,7 +86,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
                 checked={data.matriculaCartorio || false}
                 onCheckedChange={(checked) => onChange('matriculaCartorio', checked as boolean)}
               />
-              <Label htmlFor="matriculaCartorio">Matrícula em Cartório</Label>
+              <Label htmlFor="matriculaCartorio">Matricula em Cartorio</Label>
             </div>
           </div>
 
@@ -64,7 +97,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
                 checked={data.escrituraPublica || false}
                 onCheckedChange={(checked) => onChange('escrituraPublica', checked as boolean)}
               />
-              <Label htmlFor="escrituraPublica">Escritura Pública de Compra e Venda</Label>
+              <Label htmlFor="escrituraPublica">Escritura Publica de Compra e Venda</Label>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -73,7 +106,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
                 checked={data.inventario || false}
                 onCheckedChange={(checked) => onChange('inventario', checked as boolean)}
               />
-              <Label htmlFor="inventario">Inventário</Label>
+              <Label htmlFor="inventario">Inventario</Label>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -82,9 +115,23 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
                 checked={data.contaConcessionaria || false}
                 onCheckedChange={(checked) => onChange('contaConcessionaria', checked as boolean)}
               />
-              <Label htmlFor="contaConcessionaria">Conta de Concessionária (Tirar foto)</Label>
+              <Label htmlFor="contaConcessionaria">Conta de Concessionaria (Tirar foto)</Label>
             </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {['docFoto1', 'docFoto2', 'docFoto3', 'docFoto4'].map((field, idx) => (
+            <div key={field} className="border rounded p-2">
+              <div className="text-xs text-gray-700 mb-1">Foto {idx + 1}</div>
+              <input
+                type="file"
+                accept="image/png,image/jpeg"
+                onChange={(e) => handleDocPhoto(field, e.target.files)}
+                className={fileInputClassName}
+              />
+            </div>
+          ))}
         </div>
 
         <div className="space-y-2">
@@ -104,7 +151,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
               id="telefoneDoc"
               value={data.telefoneDoc || ''}
               onChange={(e) => onChange('telefoneDoc', e.target.value)}
-              placeholder="Informe o telefone para documentação"
+              placeholder="Informe o telefone para documentacao"
             />
           </div>
 
@@ -130,12 +177,12 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="resumoHistorico">Resumo do histórico do imóvel</Label>
+          <Label htmlFor="resumoHistorico">Resumo do historico do imovel</Label>
           <Textarea
             id="resumoHistorico"
             value={data.resumoHistorico || ''}
             onChange={(e) => onChange('resumoHistorico', e.target.value)}
-            placeholder="Informe o histórico do imóvel"
+            placeholder="Informe o historico do imovel"
             rows={3}
           />
         </div>
