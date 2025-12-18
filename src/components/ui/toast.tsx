@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import * as ToastPrimitives from "@radix-ui/react-toast";
@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// ðŸ’¡ importa a lÃ³gica (fila e helpers)
+// 💡 importa a lógica (fila e helpers)
 import { useToast } from "@/hooks/use-toast";
 
 const ToastProvider = ToastPrimitives.Provider;
@@ -62,7 +62,7 @@ const Toast = React.forwardRef<
       ref={ref}
       className={cn(
         toastVariants({ variant }),
-        // animaÃ§Ãµes Radix
+        // animações Radix
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-bottom-full",
         "data-[state=open]:slide-in-from-bottom-full",
@@ -171,4 +171,3 @@ export {
   ToastClose,
   ToastAction,
 };
-

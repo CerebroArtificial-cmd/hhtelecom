@@ -1,5 +1,5 @@
 export type PhotoEntry = {
-  files?: File[]; // usado no client (nao enviar pro backend)
+  files?: File[]; // usado no client (não enviar pro backend)
   urls?: string[]; // dataURL (offline) ou URL gerada no envio
   coordsText?: string; // "-23.550520, -46.633310"
   coords?: { lat: number; lng: number };
@@ -14,7 +14,7 @@ export interface ReportData {
   hunter?: string;
   operadora?: string;
   sharing?: string;
-  searchingRing?: "SIM" | "NAO";
+  searchingRing?: "SIM" | "NÃO" | "N?O";
   siteType?: "greenfield" | "rooftop";
   cidade?: string;
   telefone?: string;
@@ -26,7 +26,7 @@ export interface ReportData {
   bairro?: string;
   cep?: string;
 
-  // Documentacao
+  // Documentação
   iptu?: boolean;
   itr?: boolean;
   iptuItr?: string;
@@ -79,6 +79,6 @@ export function validateReport(data: ReportData): string[] {
   const errors: string[] = [];
   if (!data.siteType) errors.push("Tipo de site");
   if (!data.cidade) errors.push("Cidade");
-  if (!data.proprietario) errors.push("Proprietario");
+  if (!data.proprietario) errors.push("Proprietário");
   return errors;
 }

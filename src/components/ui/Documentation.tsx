@@ -29,11 +29,10 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Documentacao</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Documentação</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>IPTU ou ITR?</Label>
           <div className="flex space-x-4">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -56,7 +55,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
             id="iptuItr"
             value={data.iptuItr || ''}
             onChange={(e) => onChange('iptuItr', e.target.value)}
-            placeholder="Observacoes"
+            placeholder="Observações"
           />
         </div>
 
@@ -86,7 +85,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
                 checked={data.matriculaCartorio || false}
                 onCheckedChange={(checked) => onChange('matriculaCartorio', checked as boolean)}
               />
-              <Label htmlFor="matriculaCartorio">Matricula em Cartorio</Label>
+              <Label htmlFor="matriculaCartorio">Matrícula em Cartório</Label>
             </div>
           </div>
 
@@ -97,7 +96,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
                 checked={data.escrituraPublica || false}
                 onCheckedChange={(checked) => onChange('escrituraPublica', checked as boolean)}
               />
-              <Label htmlFor="escrituraPublica">Escritura Publica de Compra e Venda</Label>
+              <Label htmlFor="escrituraPublica">Escritura Pública de Compra e Venda</Label>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -106,7 +105,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
                 checked={data.inventario || false}
                 onCheckedChange={(checked) => onChange('inventario', checked as boolean)}
               />
-              <Label htmlFor="inventario">Inventario</Label>
+              <Label htmlFor="inventario">Inventário</Label>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -115,7 +114,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
                 checked={data.contaConcessionaria || false}
                 onCheckedChange={(checked) => onChange('contaConcessionaria', checked as boolean)}
               />
-              <Label htmlFor="contaConcessionaria">Conta de Concessionaria (Tirar foto)</Label>
+              <Label htmlFor="contaConcessionaria">Conta de Concessionária (tirar foto)</Label>
             </div>
           </div>
         </div>
@@ -151,7 +150,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
               id="telefoneDoc"
               value={data.telefoneDoc || ''}
               onChange={(e) => onChange('telefoneDoc', e.target.value)}
-              placeholder="Informe o telefone para documentacao"
+              placeholder="Informe o telefone para documentação"
             />
           </div>
 
@@ -177,12 +176,12 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="resumoHistorico">Resumo do historico do imovel</Label>
+          <Label htmlFor="resumoHistorico">Resumo do histórico do imóvel</Label>
           <Textarea
             id="resumoHistorico"
             value={data.resumoHistorico || ''}
             onChange={(e) => onChange('resumoHistorico', e.target.value)}
-            placeholder="Informe o historico do imovel"
+            placeholder="Informe o histórico do imóvel"
             rows={3}
           />
         </div>

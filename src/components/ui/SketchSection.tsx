@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ReportData } from "@/types/report";
@@ -96,4 +96,3 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
     </Card>
   );
 }
-

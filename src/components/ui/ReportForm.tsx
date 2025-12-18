@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -183,7 +183,7 @@ export default function ReportForm() {
       toast.success('Relatório enviado com sucesso!');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao enviar. Verifique sua conexÃ£o.');
+      toast.error('Erro ao enviar. Verifique sua conexão.');
     }
   };
 
@@ -266,12 +266,12 @@ export default function ReportForm() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible">
                 <TabsList className="flex w-max gap-0 sm:w-full sm:gap-0">
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informacoes</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentacao</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informações</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentação</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Seguranca</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Segurança</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observacoes</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observações</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="sketch">Croqui</TabsTrigger>
                 </TabsList>
               </div>
@@ -358,7 +358,7 @@ export default function ReportForm() {
                     }}
                     disabled={order.indexOf(activeTab as any) >= order.length - 1}
                   >
-                    PrÃ³ximo
+                    Próximo
                   </Button>
                 </div>
               </div>
@@ -366,7 +366,7 @@ export default function ReportForm() {
           </CardContent>
         </Card>
 
-        {/* âœ… Barra fixa (mobile) â€” coloque aqui, dentro do wrapper max-w */}
+        {/* Barra fixa (mobile) - manter dentro do wrapper max-w */}
         <div className="sm:hidden">
           <div className="fixed left-0 right-0 bottom-0 safe-bottom bg-background/95 backdrop-blur border-t">
             <div className="mx-auto max-w-[var(--app-max)] px-3 py-3 flex gap-2">
@@ -391,11 +391,10 @@ export default function ReportForm() {
             </div>
           </div>
 
-          {/* espaÃ§o para nÃ£o cobrir o conteÃºdo */}
+          {/* espaço para não cobrir o conteúdo */}
           <div className="h-[96px]" />
         </div>
       </div>
     </div>
   );
 }
-

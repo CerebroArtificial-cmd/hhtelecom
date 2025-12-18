@@ -41,11 +41,11 @@ export default function Infrastructure({ data, onChange }: InfrastructureProps) 
         </div>
         <div className="flex items-center space-x-2">
           <Checkbox
-            id={`${field}Nao`}
+            id={`${field}-nao`}
             checked={getValue(field) === 'nao'}
             onCheckedChange={(c) => onChange(field, c ? 'nao' : '')}
           />
-          <Label htmlFor={`${field}Nao`}>NÃO</Label>
+          <Label htmlFor={`${field}-nao`}>NÃO</Label>
         </div>
       </div>
     </div>
@@ -174,15 +174,15 @@ export default function Infrastructure({ data, onChange }: InfrastructureProps) 
         <div className="space-y-4">
           <div className="text-sm font-semibold">Infraestrutura geral</div>
           {renderYesNo('terrenoPlano', 'Terreno plano?')}
-          {renderYesNo('arvoreArea', 'Tem árvore na área locada?')}
-          {renderYesNo('construcaoArea', 'Tem construção na área locada?')}
+          {renderYesNo('arvore?rea', 'Tem árvore na área locada?')}
+          {renderYesNo('construcao?rea', 'Tem construção na área locada?')}
 
           <div className="space-y-2">
-            <Label htmlFor="medidasArea">Medidas da área locada</Label>
+            <Label htmlFor="medidas?rea">Medidas da área locada</Label>
             <Input
-              id="medidasArea"
-              value={getValue('medidasArea') || ''}
-              onChange={(e) => onChange('medidasArea', e.target.value)}
+              id="medidas?rea"
+              value={getValue('medidas?rea') || ''}
+              onChange={(e) => onChange('medidas?rea', e.target.value)}
               placeholder="Informe as medidas da área (ex.: 10 m x 15 m)"
             />
           </div>

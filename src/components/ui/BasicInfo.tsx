@@ -51,8 +51,12 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
           <Label htmlFor={`${field}-sim`}>SIM</Label>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox id={`${field}-nao`} checked={getValue(field) === 'NAO'} onCheckedChange={(c) => onChange(field, c ? 'NAO' : '')} />
-          <Label htmlFor={`${field}-nao`}>NAO</Label>
+          <Checkbox
+            id={`${field}-nao`}
+            checked={getValue(field) === 'NÃO' || getValue(field) === 'N?O'}
+            onCheckedChange={(c) => onChange(field, c ? 'NÃO' : '')}
+          />
+          <Label htmlFor={`${field}-nao`}>NÃO</Label>
         </div>
       </div>
     </div>
@@ -66,7 +70,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
   );
 
   const renderRequiredMessage = (value: unknown) =>
-    isEmpty(value) ? <p className="text-xs text-red-600">Preenchimento obrigatorio</p> : null;
+    isEmpty(value) ? <p className="text-xs text-red-600">Preenchimento obrigatório</p> : null;
 
   const renderYesNoNa = (field: string, label: string) => (
     <div className="space-y-2">
@@ -77,8 +81,12 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
           <Label htmlFor={`${field}-sim`}>SIM</Label>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox id={`${field}-nao`} checked={getValue(field) === 'NAO'} onCheckedChange={(c) => onChange(field, c ? 'NAO' : '')} />
-          <Label htmlFor={`${field}-nao`}>NAO</Label>
+          <Checkbox
+            id={`${field}-nao`}
+            checked={getValue(field) === 'NÃO' || getValue(field) === 'N?O'}
+            onCheckedChange={(c) => onChange(field, c ? 'NÃO' : '')}
+          />
+          <Label htmlFor={`${field}-nao`}>NÃO</Label>
         </div>
         <div className="flex items-center space-x-2">
           <Checkbox id={`${field}-na`} checked={getValue(field) === 'NA'} onCheckedChange={(c) => onChange(field, c ? 'NA' : '')} />
@@ -91,7 +99,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Informacoes do Site</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Informações do Site</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
@@ -126,15 +134,19 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label>A area esta dentro do searching ring?</Label>
+                <Label>A área está dentro do searching ring?</Label>
                 <div className="flex space-x-4 pt-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox id="searchingRing-sim" checked={getValue('searchingRing') === 'SIM'} onCheckedChange={(c) => onChange('searchingRing', c ? 'SIM' : '')} />
                     <Label htmlFor="searchingRing-sim">Sim</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="searchingRing-nao" checked={getValue('searchingRing') === 'NAO'} onCheckedChange={(c) => onChange('searchingRing', c ? 'NAO' : '')} />
-                    <Label htmlFor="searchingRing-nao">Nao</Label>
+                    <Checkbox
+                      id="searchingRing-nao"
+                      checked={getValue('searchingRing') === 'NÃO' || getValue('searchingRing') === 'N?O'}
+                      onCheckedChange={(c) => onChange('searchingRing', c ? 'NÃO' : '')}
+                    />
+                    <Label htmlFor="searchingRing-nao">Não</Label>
                   </div>
                 </div>
               </div>
@@ -203,8 +215,8 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="proprietario">Proprietario</Label>
-              <Input id="proprietario" value={data.proprietario || ''} onChange={(e) => onChange('proprietario', e.target.value)} placeholder="Informe o nome do proprietario" />
+              <Label htmlFor="proprietario">Proprietário</Label>
+              <Input id="proprietario" value={data.proprietario || ''} onChange={(e) => onChange('proprietario', e.target.value)} placeholder="Informe o nome do proprietário" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="representante">Representante</Label>
@@ -225,8 +237,8 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="enderecoSite">Endereco do site</Label>
-              <Input id="enderecoSite" value={data.enderecoSite || ''} onChange={(e) => onChange('enderecoSite', e.target.value)} placeholder="Informe o endereco do site" />
+              <Label htmlFor="enderecoSite">Endereço do site</Label>
+              <Input id="enderecoSite" value={data.enderecoSite || ''} onChange={(e) => onChange('enderecoSite', e.target.value)} placeholder="Informe o endereço do site" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="bairro">Bairro</Label>
@@ -240,87 +252,87 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
         </div>
 
         <div className="space-y-4">
-          <div className="text-sm font-semibold">Dados do proprietario e representante</div>
+          <div className="text-sm font-semibold">Dados do proprietário e representante</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="text-sm font-semibold">Proprietario</div>
+              <div className="text-sm font-semibold">Proprietário</div>
               <div className="space-y-2">
-                <Label htmlFor="enderecoProprietario">Endereco do proprietario</Label>
+                <Label htmlFor="enderecoPropriet?rio">Endereço do proprietário</Label>
                 <Input
-                  id="enderecoProprietario"
-                  value={getValue('enderecoProprietario') || ''}
-                  onChange={(e) => onChange('enderecoProprietario', e.target.value)}
-                  placeholder="Informe o endereco do proprietario"
-                  disabled={statusDisablesInput('enderecoProprietarioStatus')}
+                  id="enderecoPropriet?rio"
+                  value={getValue('enderecoPropriet?rio') || ''}
+                  onChange={(e) => onChange('enderecoPropriet?rio', e.target.value)}
+                  placeholder="Informe o endereço do proprietário"
+                  disabled={statusDisablesInput('enderecoPropriet?rioStatus')}
                 />
-                {renderStatusOptions('enderecoProprietarioStatus', [{ value: 'NI', label: 'N/I' }])}
+                {renderStatusOptions('enderecoPropriet?rioStatus', [{ value: 'NI', label: 'N/I' }])}
               </div>
 
               <div className="space-y-2">
-                {renderRequiredLabel('cepProprietario', 'CEP do proprietario')}
+                {renderRequiredLabel('cepPropriet?rio', 'CEP do proprietário')}
                 <Input
-                  id="cepProprietario"
-                  value={getValue('cepProprietario') || ''}
-                  onChange={(e) => onChange('cepProprietario', e.target.value)}
-                  placeholder="Informe o CEP do proprietario"
+                  id="cepPropriet?rio"
+                  value={getValue('cepPropriet?rio') || ''}
+                  onChange={(e) => onChange('cepPropriet?rio', e.target.value)}
+                  placeholder="Informe o CEP do proprietário"
                 />
-                {renderRequiredMessage(getValue('cepProprietario'))}
+                {renderRequiredMessage(getValue('cepPropriet?rio'))}
               </div>
 
               <div className="space-y-2">
-                {renderRequiredLabel('telefoneProprietario', 'Telefone do proprietario')}
+                {renderRequiredLabel('telefonePropriet?rio', 'Telefone do proprietário')}
                 <Input
-                  id="telefoneProprietario"
-                  value={getValue('telefoneProprietario') || ''}
-                  onChange={(e) => onChange('telefoneProprietario', e.target.value)}
-                  placeholder="Informe o telefone do proprietario"
+                  id="telefonePropriet?rio"
+                  value={getValue('telefonePropriet?rio') || ''}
+                  onChange={(e) => onChange('telefonePropriet?rio', e.target.value)}
+                  placeholder="Informe o telefone do proprietário"
                 />
-                {renderRequiredMessage(getValue('telefoneProprietario'))}
+                {renderRequiredMessage(getValue('telefonePropriet?rio'))}
               </div>
 
               <div className="space-y-2">
-                {renderRequiredLabel('bairroProprietario', 'Bairro do proprietario')}
+                {renderRequiredLabel('bairroPropriet?rio', 'Bairro do proprietário')}
                 <Input
-                  id="bairroProprietario"
-                  value={getValue('bairroProprietario') || ''}
-                  onChange={(e) => onChange('bairroProprietario', e.target.value)}
-                  placeholder="Informe o bairro do proprietario"
+                  id="bairroPropriet?rio"
+                  value={getValue('bairroPropriet?rio') || ''}
+                  onChange={(e) => onChange('bairroPropriet?rio', e.target.value)}
+                  placeholder="Informe o bairro do proprietário"
                 />
-                {renderRequiredMessage(getValue('bairroProprietario'))}
+                {renderRequiredMessage(getValue('bairroPropriet?rio'))}
               </div>
 
               <div className="space-y-2">
-                {renderRequiredLabel('cidadeProprietario', 'Cidade do proprietario')}
+                {renderRequiredLabel('cidadePropriet?rio', 'Cidade do proprietário')}
                 <Input
-                  id="cidadeProprietario"
-                  value={getValue('cidadeProprietario') || ''}
-                  onChange={(e) => onChange('cidadeProprietario', e.target.value)}
-                  placeholder="Informe a cidade do proprietario"
+                  id="cidadePropriet?rio"
+                  value={getValue('cidadePropriet?rio') || ''}
+                  onChange={(e) => onChange('cidadePropriet?rio', e.target.value)}
+                  placeholder="Informe a cidade do proprietário"
                 />
-                {renderRequiredMessage(getValue('cidadeProprietario'))}
+                {renderRequiredMessage(getValue('cidadePropriet?rio'))}
               </div>
 
               <div className="space-y-2">
-                {renderRequiredLabel('estadoProprietario', 'Estado do proprietario')}
+                {renderRequiredLabel('estadoPropriet?rio', 'Estado do proprietário')}
                 <Input
-                  id="estadoProprietario"
-                  value={getValue('estadoProprietario') || ''}
-                  onChange={(e) => onChange('estadoProprietario', e.target.value)}
-                  placeholder="Informe o estado do proprietario"
+                  id="estadoPropriet?rio"
+                  value={getValue('estadoPropriet?rio') || ''}
+                  onChange={(e) => onChange('estadoPropriet?rio', e.target.value)}
+                  placeholder="Informe o estado do proprietário"
                 />
-                {renderRequiredMessage(getValue('estadoProprietario'))}
+                {renderRequiredMessage(getValue('estadoPropriet?rio'))}
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="text-sm font-semibold">Representante</div>
               <div className="space-y-2">
-                <Label htmlFor="enderecoRepresentante">Endereco do representante</Label>
+                <Label htmlFor="enderecoRepresentante">Endereço do representante</Label>
                 <Input
                   id="enderecoRepresentante"
                   value={getValue('enderecoRepresentante') || ''}
                   onChange={(e) => onChange('enderecoRepresentante', e.target.value)}
-                  placeholder="Informe o endereco do representante"
+                  placeholder="Informe o endereço do representante"
                   disabled={statusDisablesInput('enderecoRepresentanteStatus')}
                 />
                 {renderStatusOptions('enderecoRepresentanteStatus', [
@@ -408,7 +420,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
         </div>
 
         <div className="space-y-4">
-          <div className="text-sm font-semibold">Classificacao</div>
+          <div className="text-sm font-semibold">Classificação</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               {renderRequiredLabel('tipoPessoa', 'Tipo de pessoa')}
@@ -419,23 +431,23 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 onChange={(e) => onChange('tipoPessoa', e.target.value)}
               >
                 <option value="">Selecione</option>
-                <option value="FISICA">Fisica</option>
-                <option value="JURIDICA">Juridica</option>
-                <option value="ORGAO_PUBLICO">Orgao publico</option>
+                <option value="FISICA">Física</option>
+                <option value="JURIDICA">Jurídica</option>
+                <option value="ORGAO_PUBLICO">Órgão público</option>
               </select>
               {renderRequiredMessage(getValue('tipoPessoa'))}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="relacaoProprietario">Relacao com proprietario</Label>
+              <Label htmlFor="relacaoPropriet?rio">Relação com proprietário</Label>
               <select
-                id="relacaoProprietario"
+                id="relacaoPropriet?rio"
                 className={selectClassName}
-                value={getValue('relacaoProprietario') || ''}
-                onChange={(e) => onChange('relacaoProprietario', e.target.value)}
+                value={getValue('relacaoPropriet?rio') || ''}
+                onChange={(e) => onChange('relacaoPropriet?rio', e.target.value)}
               >
                 <option value="">Selecione</option>
-                <option value="IRMAO">Irmao</option>
+                <option value="IRMAO">Irmão</option>
                 <option value="FILHO">Filho</option>
                 <option value="PRIMO">Primo</option>
                 <option value="OUTRO">Outro</option>
@@ -454,14 +466,14 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 <option value="">Selecione</option>
                 <option value="TERRENO_URBANO">Terreno urbano</option>
                 <option value="TERRENO_RURAL">Terreno rural</option>
-                <option value="AREA_PUBLICA">Area publica</option>
-                <option value="TOPO_PREDIO_SOBRADO">Topo de predio/sobrado</option>
+                <option value="AREA_PUBLICA">Área pública</option>
+                <option value="TOPO_PREDIO_SOBRADO">Topo de prédio/sobrado</option>
               </select>
               {renderRequiredMessage(getValue('tipoPropriedade'))}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="estadoConservacao">Estado de conservacao</Label>
+              <Label htmlFor="estadoConservacao">Estado de conservação</Label>
               <select
                 id="estadoConservacao"
                 className={selectClassName}
@@ -471,17 +483,17 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 <option value="">Selecione</option>
                 <option value="BOM">Bom</option>
                 <option value="REGULAR">Regular</option>
-                <option value="PESSIMO">Pessimo</option>
+                <option value="PESSIMO">Péssimo</option>
               </select>
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="text-sm font-semibold">Edificacao e area</div>
+          <div className="text-sm font-semibold">Edificação e área</div>
           <div className="space-y-2">
             <Label className={requiredLabelClassName}>
-              Edificacao existente?
+              Edificação existente?
               <span className={requiredMarkerClassName}>*</span>
             </Label>
             <div className="flex space-x-4">
@@ -490,8 +502,12 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 <Label htmlFor="edificacaoExistente-sim">SIM</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="edificacaoExistente-nao" checked={getValue('edificacaoExistente') === 'NAO'} onCheckedChange={(c) => onChange('edificacaoExistente', c ? 'NAO' : '')} />
-                <Label htmlFor="edificacaoExistente-nao">NAO</Label>
+                <Checkbox
+                  id="edificacaoExistente-nao"
+                  checked={getValue('edificacaoExistente') === 'NÃO' || getValue('edificacaoExistente') === 'N?O'}
+                  onCheckedChange={(c) => onChange('edificacaoExistente', c ? 'NÃO' : '')}
+                />
+                <Label htmlFor="edificacaoExistente-nao">NÃO</Label>
               </div>
             </div>
             {renderRequiredMessage(getValue('edificacaoExistente'))}
@@ -499,7 +515,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
           {renderYesNoNa('precisaDemolir', 'Precisa ser demolida?')}
 
           <div className="space-y-2">
-            <Label htmlFor="responsavelDemolicao">Responsavel pela demolicao</Label>
+            <Label htmlFor="responsavelDemolicao">Responsável pela demolição</Label>
             <select
               id="responsavelDemolicao"
               className={selectClassName}
@@ -513,15 +529,15 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
             </select>
           </div>
 
-          {renderYesNoNa('areaLivreUtilizada', 'Area (terreno) livre? Sera utilizada?')}
+          {renderYesNoNa('areaLivreUtilizada', 'Área (terreno) livre? Será utilizada?')}
 
           <div className="space-y-2">
-            <Label htmlFor="dimensoesAreaDisponivel">Dimensoes da area disponivel</Label>
+            <Label htmlFor="dimensoes?reaDisponivel">Dimensões da área disponível</Label>
             <Input
-              id="dimensoesAreaDisponivel"
-              value={getValue('dimensoesAreaDisponivel') || ''}
-              onChange={(e) => onChange('dimensoesAreaDisponivel', e.target.value)}
-              placeholder="Informe as dimensoes da area disponivel"
+              id="dimensoes?reaDisponivel"
+              value={getValue('dimensoes?reaDisponivel') || ''}
+              onChange={(e) => onChange('dimensoes?reaDisponivel', e.target.value)}
+              placeholder="Informe as dimensões da área disponível"
             />
           </div>
 
@@ -542,10 +558,10 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
             </select>
           </div>
 
-          {renderYesNo('supressaoVegetacao', 'Supressao de vegetacao?')}
+          {renderYesNo('supressaoVegetacao', 'Supressão de vegetação?')}
 
           <div className="space-y-2">
-            <Label htmlFor="responsavelSupressao">Responsavel</Label>
+            <Label htmlFor="responsavelSupressao">Responsável</Label>
             <select
               id="responsavelSupressao"
               className={selectClassName}
@@ -563,7 +579,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
         <div className="space-y-4">
           <div className="text-sm font-semibold">Operadoras e acesso</div>
           {renderYesNo('outraOperadora500m', 'Outra operadora no raio de 500 m?')}
-          {renderYesNo('proprietarioImovelEstrutura', 'Proprietario do imovel e/ou estrutura?')}
+          {renderYesNo('proprietarioImovelEstrutura', 'Proprietário do imóvel e/ou estrutura?')}
 
           <div className="space-y-2">
             <Label htmlFor="operadorasRaio500m">Quais operadoras no raio de 500 m?</Label>
@@ -592,37 +608,37 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="restricaoAcesso">Restricoes de acesso e disponibilidade 24x7</Label>
+            <Label htmlFor="restricaoAcesso">Restrições de acesso e disponibilidade 24x7</Label>
             <Textarea
               id="restricaoAcesso"
               value={getValue('restricaoAcesso') || ''}
               onChange={(e) => onChange('restricaoAcesso', e.target.value)}
-              placeholder="Informe as restricoes de acesso e disponibilidade"
+              placeholder="Informe as restrições de acesso e disponibilidade"
               rows={3}
             />
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="text-sm font-semibold">Negociacao e observacoes</div>
+          <div className="text-sm font-semibold">Negociação e observações</div>
           <div className="space-y-2">
-            <Label htmlFor="resumoNegociacao">Resumo sobre a negociacao</Label>
+            <Label htmlFor="resumoNegocia??o">Resumo sobre a negociação</Label>
             <Textarea
-              id="resumoNegociacao"
-              value={getValue('resumoNegociacao') || ''}
-              onChange={(e) => onChange('resumoNegociacao', e.target.value)}
-              placeholder="Informe o resumo da negociacao"
+              id="resumoNegocia??o"
+              value={getValue('resumoNegocia??o') || ''}
+              onChange={(e) => onChange('resumoNegocia??o', e.target.value)}
+              placeholder="Informe o resumo da negociação"
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="observacoes">Observacoes (ex.: exigencias do proprietario, cobertura, telefone fixo)</Label>
+            <Label htmlFor="observacoes">Observações (ex.: exigências do proprietário, cobertura, telefone fixo)</Label>
             <Textarea
               id="observacoes"
               value={getValue('observacoes') || ''}
               onChange={(e) => onChange('observacoes', e.target.value)}
-              placeholder="Informe as observacoes"
+              placeholder="Informe as observações"
               rows={3}
             />
           </div>

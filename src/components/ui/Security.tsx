@@ -43,7 +43,11 @@ export default function Security({ data, onChange }: SecurityProps) {
           <Label htmlFor={`${field}-sim`}>SIM</Label>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox id={`${field}-nao`} checked={getValue(field) === 'NAO'} onCheckedChange={(c) => onChange(field, c ? 'NAO' : '')} />
+          <Checkbox
+            id={`${field}-nao`}
+            checked={getValue(field) === 'NÃO' || getValue(field) === 'N?O'}
+            onCheckedChange={(c) => onChange(field, c ? 'NÃO' : '')}
+          />
           <Label htmlFor={`${field}-nao`}>NÃO</Label>
         </div>
       </div>
