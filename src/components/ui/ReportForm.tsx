@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -71,7 +71,7 @@ export default function ReportForm() {
   const handleSave = () => {
     setSaving(true);
     localStorage.setItem('visitReport', JSON.stringify(formData));
-    toast.success('Relatório salvo com sucesso!');
+    toast.success('RelatÃ³rio salvo com sucesso!');
     setSaving(false);
   };
 
@@ -148,7 +148,7 @@ export default function ReportForm() {
 
   const handleSubmit = async () => {
     if (!isOnline) {
-      toast.error('Você está offline. Envio indisponível.');
+      toast.error('VocÃª estÃ¡ offline. Envio indisponÃ­vel.');
       return;
     }
     try {
@@ -176,14 +176,14 @@ export default function ReportForm() {
       });
       if (!res.ok) {
         const text = await res.text();
-        toast.error('Falha ao enviar Relatório');
+        toast.error('Falha ao enviar RelatÃ³rio');
         console.error('Backend error:', res.status, text);
         return;
       }
-      toast.success('Relatório enviado com sucesso!');
+      toast.success('RelatÃ³rio enviado com sucesso!');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao enviar. Verifique sua conexão.');
+      toast.error('Erro ao enviar. Verifique sua conexÃ£o.');
     }
   };
 
@@ -212,126 +212,180 @@ export default function ReportForm() {
   const isOnlineSafe = mounted ? isOnline : true;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-2xl">Relatório de Buscas</CardTitle>
-              <p className="text-muted-foreground mt-1">Progresso: {pct}% completo</p>
-              {!isOnlineSafe && (
-                <p className="text-xs text-amber-700 mt-1">Você está offline. É possível salvar/exportar, mas não enviar.</p>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClear}
-              >
-                Limpar
-              </Button>
+    <div className="safe-top safe-bottom">
+      <div className="mx-auto w-full max-w-[var(--app-max)] px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle className="text-xl sm:text-2xl">RelatÃ³rio de Buscas</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Progresso: {pct}% completo
+                </p>
 
-              <Button
-                type="button"
-                className="bg-[#D9452F] hover:bg-[#bf3a29] text-white"
-                onClick={handleSave}
-              >
-                {saving ? "Salvando..." : "Salvar"}
-              </Button>
+                {!isOnlineSafe && (
+                  <p className="text-xs text-amber-700 mt-1">
+                    VocÃª estÃ¡ offline. Ã‰ possÃ­vel salvar/exportar, mas nÃ£o enviar.
+                  </p>
+                )}
+              </div>
 
-              <Button
-                type="button"
-                className="bg-[#0f766e] hover:bg-[#0c5f59] text-white"
-                onClick={handleExport}
-                disabled={exporting}
-              >
-                {exporting ? "Exportando..." : "Exportar"}
-              </Button>
-            </div>
-          </div>
-          <div className="mt-2 h-2 w-full bg-gray-200 rounded">
-            <div className="h-full rounded" style={{ width: `${pct}%`, backgroundColor: "#77807a" }} />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2">
-              <TabsTrigger value="inicio">Informações</TabsTrigger>
-              <TabsTrigger value="documentation">Documentação</TabsTrigger>
-              <TabsTrigger value="infrastructure">Infraestrutura</TabsTrigger>
-              <TabsTrigger value="security">Segurança</TabsTrigger>
-              <TabsTrigger value="photos">Fotos</TabsTrigger>
-              <TabsTrigger value="rules">Observações</TabsTrigger>
-              <TabsTrigger value="sketch">Croqui</TabsTrigger>
-            </TabsList>
+              <div className="flex gap-2 sm:gap-3 sm:justify-end">
+                <Button type="button" variant="outline" onClick={handleClear} className="h-9">
+                  Limpar
+                </Button>
 
-            <TabsContent value="inicio">
-              <BasicInfo data={formData} onChange={handleFieldChange} />
-            </TabsContent>
+                <Button
+                  type="button"
+                  onClick={handleSave}
+                  className="h-9 flex-1 sm:flex-none bg-[#D9452F] hover:bg-[#bf3a29] text-white"
+                >
+                  {saving ? "Salvando..." : "Salvar"}
+                </Button>
 
-            <TabsContent value="documentation">
-              <Documentation data={formData} onChange={handleFieldChange} />
-            </TabsContent>
-
-            <TabsContent value="infrastructure">
-              <Infrastructure data={formData} onChange={handleFieldChange} />
-            </TabsContent>
-
-            <TabsContent value="security">
-              <Security data={formData} onChange={handleFieldChange} />
-            </TabsContent>
-
-            <TabsContent value="photos">
-              <PhotoChecklist data={formData} onChange={handleFieldChange} />
-            </TabsContent>
-
-            <TabsContent value="rules">
-              <RulesSection data={formData as any} onChange={handleFieldChange} />
-            </TabsContent>
-
-            <TabsContent value="sketch">
-              <SketchSection data={formData} onChange={handleFieldChange} />
-            </TabsContent>
-          </Tabs>
-
-          {activeTab === 'sketch' ? (
-            <div className="flex justify-between items-center pt-6">
-              <p className="text-sm text-muted-foreground">Revise os dados (não é obrigatório preencher todos os campos) e envie o Relatório para a planilha.</p>
-              <div className="flex flex-wrap gap-2 justify-end">
-                <Button variant="outline" className="w-full sm:w-auto"
-                  onClick={() => {
-                    const i = order.indexOf(activeTab as any);
-                    if (i > 0) setActiveTab(order[i - 1]);
-                  }}
-                >Voltar</Button>
-                <Button className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto" onClick={handleSubmit} disabled={!isOnlineSafe}>Enviar</Button>
+                <Button
+                  type="button"
+                  onClick={handleExport}
+                  disabled={exporting}
+                  className="h-9 bg-[#0f766e] hover:bg-[#0c5f59] text-white"
+                >
+                  {exporting ? "Exportando..." : "Exportar"}
+                </Button>
               </div>
             </div>
-          ) : (
-            <div className="flex justify-between items-center pt-6">
-              <p className="text-sm text-muted-foreground">Os dados são salvos automaticamente no seu navegador. Você pode prosseguir sem preencher todos os campos.</p>
-              <div className="flex flex-wrap gap-2 justify-end">
-                {idx > 0 && (
-                  <Button variant="outline" className="w-full sm:w-auto"
+
+            <div className="mt-2 h-2 w-full bg-gray-200 rounded">
+              <div
+                className="h-full rounded"
+                style={{ width: `${pct}%`, backgroundColor: "#77807a" }}
+              />
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="flex w-full gap-2 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:flex-wrap sm:overflow-visible">
+                <TabsTrigger className="whitespace-nowrap" value="inicio">InformaÃ§Ãµes</TabsTrigger>
+                <TabsTrigger className="whitespace-nowrap" value="documentation">DocumentaÃ§Ã£o</TabsTrigger>
+                <TabsTrigger className="whitespace-nowrap" value="infrastructure">Infraestrutura</TabsTrigger>
+                <TabsTrigger className="whitespace-nowrap" value="security">SeguranÃ§a</TabsTrigger>
+                <TabsTrigger className="whitespace-nowrap" value="photos">Fotos</TabsTrigger>
+                <TabsTrigger className="whitespace-nowrap" value="rules">ObservaÃ§Ãµes</TabsTrigger>
+                <TabsTrigger className="whitespace-nowrap" value="sketch">Croqui</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="inicio">
+                <BasicInfo data={formData} onChange={handleFieldChange} />
+              </TabsContent>
+
+              <TabsContent value="documentation">
+                <Documentation data={formData} onChange={handleFieldChange} />
+              </TabsContent>
+
+              <TabsContent value="infrastructure">
+                <Infrastructure data={formData} onChange={handleFieldChange} />
+              </TabsContent>
+
+              <TabsContent value="security">
+                <Security data={formData} onChange={handleFieldChange} />
+              </TabsContent>
+
+              <TabsContent value="photos">
+                <PhotoChecklist data={formData} onChange={handleFieldChange} />
+              </TabsContent>
+
+              <TabsContent value="rules">
+                <RulesSection data={formData as any} onChange={handleFieldChange} />
+              </TabsContent>
+
+              <TabsContent value="sketch">
+                <SketchSection data={formData} onChange={handleFieldChange} />
+              </TabsContent>
+            </Tabs>
+
+            {activeTab === "sketch" ? (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Revise os dados (nÃ£o Ã© obrigatÃ³rio preencher todos os campos) e envie o RelatÃ³rio.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto"
                     onClick={() => {
                       const i = order.indexOf(activeTab as any);
                       if (i > 0) setActiveTab(order[i - 1]);
                     }}
-                  >Anterior</Button>
-                )}
-                <Button className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto"
-                  onClick={() => {
-                    const i = order.indexOf(activeTab as any);
-                    if (i < order.length - 1) setActiveTab(order[i + 1]);
-                  }}
-                  disabled={order.indexOf(activeTab as any) >= order.length - 1}
-                >Próximo</Button>
+                  >
+                    Voltar
+                  </Button>
+
+                  <Button
+                    className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto"
+                    onClick={handleSubmit}
+                    disabled={!isOnlineSafe}
+                  >
+                    Enviar
+                  </Button>
+                </div>
               </div>
+            ) : (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Os dados sÃ£o salvos automaticamente no seu navegador. VocÃª pode prosseguir sem preencher todos os campos.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {idx > 0 && (
+                    <Button
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                      onClick={() => {
+                        const i = order.indexOf(activeTab as any);
+                        if (i > 0) setActiveTab(order[i - 1]);
+                      }}
+                    >
+                      Anterior
+                    </Button>
+                  )}
+
+                  <Button
+                    className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto"
+                    onClick={() => {
+                      const i = order.indexOf(activeTab as any);
+                      if (i < order.length - 1) setActiveTab(order[i + 1]);
+                    }}
+                    disabled={order.indexOf(activeTab as any) >= order.length - 1}
+                  >
+                    PrÃ³ximo
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* âœ… Barra fixa (mobile) â€” coloque aqui, dentro do wrapper max-w */}
+        <div className="sm:hidden">
+          <div className="fixed left-0 right-0 bottom-0 safe-bottom bg-background/95 backdrop-blur border-t">
+            <div className="mx-auto max-w-[var(--app-max)] px-3 py-3 flex gap-2">
+              <Button variant="outline" className="h-11 w-1/3" onClick={handleClear}>
+                Limpar
+              </Button>
+
+              <Button
+                className="h-11 flex-1 bg-[#D9452F] hover:bg-[#bf3a29] text-white"
+                onClick={handleSave}
+              >
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+
+          {/* espaÃ§o para nÃ£o cobrir o conteÃºdo */}
+          <div className="h-[84px]" />
+        </div>
+      </div>
     </div>
   );
 }
+

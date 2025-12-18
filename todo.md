@@ -6,11 +6,8 @@ Geral
 - [ ] Indicadores de progresso por aba e erros em destaque
 - [ ] Melhorar máscaras de entrada (telefone, CEP, moeda)
 
-Backend (Flask + Excel)
-- [x] API /api/relatorios grava em Planilha_Visita_Site.xlsx (aba Relatorios)
+Backend (Flask)
 - [ ] Sanitizar payload (whitelist/casting) antes de gravar
-- [ ] Tratar arquivo bloqueado/aberto e mensagens de erro mais claras
-- [ ] Rotina de backup/rotação do Excel (opcional)
 
 Frontend (Next.js)
 - [x] Enviar para BACKEND_URL em vez de Make
@@ -28,6 +25,7 @@ Fotos
 - [ ] Avisos quando Cloudinary não estiver configurado e usuário esperar upload
 
 Documentação
-- [x] README atualizado para Flask/Excel
-- [ ] Guia de troubleshooting (Excel aberto, CORS, offline)
+- [x] README atualizado
+- [ ] Guia de troubleshooting (CORS, offline)
 - [ ] Checklist de publicação
+
