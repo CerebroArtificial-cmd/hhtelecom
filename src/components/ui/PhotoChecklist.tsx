@@ -70,6 +70,40 @@ const photoFields: Array<{
 const ANGLES = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
 const IS_360 = new Set(["fotos360meio", "fotos360frente"]);
 
+const RT_FIELDS: Array<{ id: string; label: string; requireCoords?: boolean; multiple?: boolean; minCount?: number; fixedSlots?: number; }> = [
+  { id: "rt_fachada_1", label: "FOTO DA FACHADA 1" },
+  { id: "rt_fachada_2", label: "FOTO DA FACHADA 2" },
+  { id: "rt_trafo_interno_1", label: "TRAFO INTERNO 1" },
+  { id: "rt_trafo_interno_2", label: "TRAFO INTERNO 2" },
+  { id: "rt_espaco_medidor_1", label: "ESPACO PARA O MEDIDOR 1" },
+  { id: "rt_espaco_medidor_2", label: "ESPACO MEDIDOR 2" },
+  { id: "rt_passagem_cabos_1", label: "PASSAGEM DE CABOS 1" },
+  { id: "rt_passagem_cabos_2", label: "PASSAGEM DE CABOS 2" },
+  { id: "rt_elevador_1", label: "ELEVADOR 1" },
+  { id: "rt_elevador_2", label: "ELEVADOR 2" },
+  { id: "rt_placa_elevador", label: "PLACA DO ELEVADOR" },
+  { id: "rt_quadro_dg", label: "QUADRO DG" },
+  { id: "rt_escada_1", label: "ESCADA 1" },
+  { id: "rt_escada_2", label: "ESCADA 2" },
+  { id: "rt_acesso_topo_1", label: "ACESSO AO TOPO 1" },
+  { id: "rt_acesso_topo_2", label: "ACESSO AO TOPO 2" },
+  { id: "rt_acesso_topo_3", label: "ACESSO AO TOPO 3" },
+  { id: "rt_area_equip_1", label: "AREA DOS EQUIPAMENTOS 1" },
+  { id: "rt_area_equip_2", label: "AREA DOS EQUIPAMENTOS 2" },
+  { id: "rt_area_equip_3", label: "AREA DOS EQUIPAMENTOS 3" },
+  { id: "rt_energia_topo_1", label: "ENERGIA NO TOPO 1" },
+  { id: "rt_energia_topo_2", label: "ENERGIA NO TOPO 2" },
+  { id: "rt_caixa_dagua_1", label: "CAIXA DAGUA 1" },
+  { id: "rt_caixa_dagua_2", label: "CAIXA DAGUA 2" },
+  { id: "rt_interna_caixa_dagua_1", label: "INTERNA CAIXA DAGUA 1" },
+  { id: "rt_interna_caixa_dagua_2", label: "INTERNA CAIXA DAGUA 2" },
+  { id: "rt_para_raios_1", label: "PARA-RAIOS 1" },
+  { id: "rt_para_raios_2", label: "PARA-RAIOS 2" }
+];
+
+const RT_IDS = new Set(RT_FIELDS.map((f) => f.id));
+const GROUP_360 = new Set(["panoramica", ...IS_360]);
+
 function angleLabel(a: number) {
   return `${a}\u00B0`;
 }
@@ -290,9 +324,11 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const visibleFields = photoFields.filter((item) =>
-    photoView === "360" ? IS_360.has(item.id) : !IS_360.has(item.id)
-  );
+  const visibleFields = photoView === "360"
+    ? photoFields.filter((item) => GROUP_360.has(item.id))
+    : photoView === "rt"
+    ? RT_FIELDS
+    : photoFields.filter((item) => !GROUP_360.has(item.id) && !RT_IDS.has(item.id));
 
   return (
     <Card>
