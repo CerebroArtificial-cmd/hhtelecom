@@ -22,7 +22,6 @@ Fotos
 - [x] Compressão no cliente
 - [x] Captura de GPS (botão “Usar GPS”)
 - [ ] Validar contadores (ex.: 12 fotos 360°)
-- [ ] Avisos quando Cloudinary não estiver configurado e usuário esperar upload
 
 Documentação
 - [x] README atualizado

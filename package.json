@@ -18,8 +18,6 @@
                             "@types/node":  "24.9.2",
                             "@types/react":  "19.2.2",
                             "autoprefixer":  "^10.4.21",
-                            "concurrently":  "^9.1.2",
-                            "cross-env":  "^10.1.0",
                             "postcss":  "^8.5.6",
                             "tailwindcss":  "^3.4.13",
                             "tailwindcss-animate":  "^1.0.7",
@@ -27,16 +25,10 @@
                         },
     "scripts":  {
                     "build":  "next build",
-                    "dev":  "concurrently -k -n FRONTEND,BACKEND -c \"bgBlue.bold,bgGreen.bold\" \"next dev\" \"npm run backend\"",
-                    "start:3010":  "cross-env PORT=3010 next start",
+                    "dev":  "next dev",
                     "start":  "next start",
-                    "backend":  ".\\\\.venv\\\\Scripts\\\\python.exe backend/app.py",
-                    "dev:frontend":  "cross-env PORT=$PORT next dev",
-                    "dev:full":  "concurrently -k -n FRONTEND,BACKEND -c \"bgBlue.bold,bgGreen.bold\" \"npm run dev:frontend\" \"npm run backend\"",
-                    "start:replit":  "concurrently -k -n FRONTEND,BACKEND -c \"bgBlue.bold,bgGreen.bold\" \"cross-env PORT=$PORT next start\" \"npm run backend\"",
                     "setup":  "npm install",
-                    "dev:webpack":  "cross-env NEXT_DISABLE_TURBOPACK=1 next dev",
-                    "dev:fast":  "concurrently -k -n FRONTEND,BACKEND -c \"bgBlue.bold,bgGreen.bold\" \"cross-env NEXT_TELEMETRY_DISABLED=1 NEXT_DISABLE_ESLINT=1 next dev\" \"npm run backend\""
+                    "dev:webpack":  "NEXT_DISABLE_TURBOPACK=1 next dev"
                 },
     "engines":  {
                     "node":  "20.x",

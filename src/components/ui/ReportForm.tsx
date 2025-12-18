@@ -230,7 +230,7 @@ export default function ReportForm() {
                 )}
               </div>
 
-              <div className="flex gap-2 sm:gap-3 sm:justify-end">
+              <div className="hidden sm:flex gap-2 sm:gap-3 sm:justify-end">
                 <Button type="button" variant="outline" onClick={handleClear} className="h-9">
                   Limpar
                 </Button>
@@ -264,7 +264,8 @@ export default function ReportForm() {
 
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="flex w-full gap-2 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:flex-wrap sm:overflow-visible">
+              <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch]">
+                <TabsList className="flex w-max gap-2 sm:w-full sm:flex-wrap sm:justify-start">
                 <TabsTrigger className="whitespace-nowrap" value="inicio">InformaÃ§Ãµes</TabsTrigger>
                 <TabsTrigger className="whitespace-nowrap" value="documentation">DocumentaÃ§Ã£o</TabsTrigger>
                 <TabsTrigger className="whitespace-nowrap" value="infrastructure">Infraestrutura</TabsTrigger>
@@ -272,7 +273,8 @@ export default function ReportForm() {
                 <TabsTrigger className="whitespace-nowrap" value="photos">Fotos</TabsTrigger>
                 <TabsTrigger className="whitespace-nowrap" value="rules">ObservaÃ§Ãµes</TabsTrigger>
                 <TabsTrigger className="whitespace-nowrap" value="sketch">Croqui</TabsTrigger>
-              </TabsList>
+                </TabsList>
+              </div>
 
               <TabsContent value="inicio">
                 <BasicInfo data={formData} onChange={handleFieldChange} />
@@ -373,16 +375,24 @@ export default function ReportForm() {
               </Button>
 
               <Button
-                className="h-11 flex-1 bg-[#D9452F] hover:bg-[#bf3a29] text-white"
+                className="h-11 w-1/3 bg-[#D9452F] hover:bg-[#bf3a29] text-white"
                 onClick={handleSave}
               >
                 {saving ? "Salvando..." : "Salvar"}
+              </Button>
+
+              <Button
+                className="h-11 w-1/3 bg-[#0f766e] hover:bg-[#0c5f59] text-white"
+                onClick={handleExport}
+                disabled={exporting}
+              >
+                {exporting ? "Exportando..." : "Exportar"}
               </Button>
             </div>
           </div>
 
           {/* espaÃ§o para nÃ£o cobrir o conteÃºdo */}
-          <div className="h-[84px]" />
+          <div className="h-[96px]" />
         </div>
       </div>
     </div>

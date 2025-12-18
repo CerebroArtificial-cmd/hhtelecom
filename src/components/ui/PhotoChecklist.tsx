@@ -5,13 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Label } from "./label";
 import { Input } from "./input";
 import { Button } from "./button";
-import { Checkbox } from "./checkbox";
 import type { ReportData } from "@/types/report";
 import { savePhotos, loadPhotos } from "@/lib/idb";
-
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET;
-const DISABLE_CLOUDINARY = String(process.env.NEXT_PUBLIC_DISABLE_CLOUDINARY || "").toLowerCase() === "true";
 
 type PhotoEntry = {
   files?: File[];
@@ -118,20 +113,6 @@ async function fileToDataURL(file: File): Promise<string> {
   });
 }
 
-async function uploadToCloudinary(file: File): Promise<string> {
-  if (!CLOUD_NAME || !UPLOAD_PRESET) {
-    throw new Error("Cloudinary não configurado. Defina NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME e NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET.");
-  }
-  const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
-  const form = new FormData();
-  form.append("file", file);
-  form.append("upload_preset", UPLOAD_PRESET);
-  const res = await fetch(url, { method: "POST", body: form });
-  const json = await res.json();
-  if (!res.ok) throw new Error(json?.error?.message || "Falha no upload");
-  return json.secure_url as string;
-}
-
 function blobToFile(blob: Blob, name = "photo.jpg"): File {
   return new File([blob], name, { type: blob.type || "image/jpeg" });
 }
@@ -139,17 +120,6 @@ function blobToFile(blob: Blob, name = "photo.jpg"): File {
 export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) {
   const photos = (data as any).photosUploads || {};
   const [isOnline, setIsOnline] = React.useState(typeof navigator !== "undefined" ? navigator.onLine : true);
-  const defaultCloud = !DISABLE_CLOUDINARY && !!CLOUD_NAME && !!UPLOAD_PRESET;
-  const [useCloudUpload, setUseCloudUpload] = React.useState<boolean>(defaultCloud);
-
-  React.useEffect(() => {
-    try {
-      const v = localStorage.getItem("useCloudUpload");
-      if (v !== null) setUseCloudUpload(v === "true");
-    } catch {}
-    try { localStorage.setItem("useCloudUpload", String(useCloudUpload)); } catch {}
-  }, [useCloudUpload]);
-
   React.useEffect(() => {
     const on = () => setIsOnline(true);
     const off = () => setIsOnline(false);
@@ -175,17 +145,10 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     for (const f of files) processed.push(await compressImage(f, 0.85));
 
     try {
-      if (isOnline && CLOUD_NAME && UPLOAD_PRESET && !DISABLE_CLOUDINARY && useCloudUpload) {
-        const urls: string[] = [];
-        for (const f of processed) urls.push(await uploadToCloudinary(f));
-        setEntry(id, { files: processed, urls });
-        await savePhotos(id, processed);
-      } else {
-        const urls: string[] = [];
-        for (const f of processed) urls.push(await fileToDataURL(f));
-        setEntry(id, { files: processed, urls });
-        await savePhotos(id, processed);
-      }
+      const urls: string[] = [];
+      for (const f of processed) urls.push(await fileToDataURL(f));
+      setEntry(id, { files: processed, urls });
+      await savePhotos(id, processed);
     } catch (e: any) {
       alert(`Falha ao processar imagens: ${e?.message || e}`);
       setEntry(id, { files: processed });
@@ -215,12 +178,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
 
     const processed = await compressImage(file, 0.85);
     try {
-      let url: string | undefined;
-      if (isOnline && CLOUD_NAME && UPLOAD_PRESET && !DISABLE_CLOUDINARY && useCloudUpload) {
-        url = await uploadToCloudinary(processed);
-      } else {
-        url = await fileToDataURL(processed);
-      }
+      const url = await fileToDataURL(processed);
       currentFiles[angleIndex] = processed;
       currentUrls[angleIndex] = url;
       setEntry(id, { files: currentFiles, urls: currentUrls });
@@ -249,12 +207,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
 
     const processed = await compressImage(file, 0.85);
     try {
-      let url: string | undefined;
-      if (isOnline && CLOUD_NAME && UPLOAD_PRESET && !DISABLE_CLOUDINARY && useCloudUpload) {
-        url = await uploadToCloudinary(processed);
-      } else {
-        url = await fileToDataURL(processed);
-      }
+      const url = await fileToDataURL(processed);
       currentFiles[slotIndex] = processed;
       currentUrls[slotIndex] = url;
       setEntry(id, { files: currentFiles, urls: currentUrls });
@@ -349,15 +302,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
               Modo offline: fotos serão salvas localmente e não serão enviadas agora.
             </p>
           )}
-          {(CLOUD_NAME && UPLOAD_PRESET) ? (
-            <div className="mt-1 flex items-center gap-2">
-              <Checkbox id="use-cloud-upload" checked={useCloudUpload} onCheckedChange={(v) => setUseCloudUpload(!!v)} disabled={DISABLE_CLOUDINARY} />
-              <Label htmlFor="use-cloud-upload" className={`text-sm ${DISABLE_CLOUDINARY ? "opacity-60" : ""}`}>Enviar fotos para a nuvem (Cloudinary)</Label>
-              {DISABLE_CLOUDINARY && <span className="text-xs text-amber-700">(desativado por configuração)</span>}
-            </div>
-          ) : (
-            <p className="mt-1 text-xs text-gray-500">Cloudinary não configurado; fotos serão salvas localmente.</p>
-          )}
+          <p className="mt-1 text-xs text-gray-500">As fotos ficam salvas localmente no dispositivo.</p>
         </div>
       </CardHeader>
 
