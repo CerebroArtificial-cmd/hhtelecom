@@ -53,7 +53,7 @@ export default function Security({ data, onChange }: SecurityProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Condições de acesso e segurança</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Condições de acesso e segurança</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">

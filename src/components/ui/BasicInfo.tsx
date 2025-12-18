@@ -91,7 +91,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Informações do Site</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Informações do Site</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">

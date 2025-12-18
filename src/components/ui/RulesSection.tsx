@@ -14,7 +14,7 @@ export default function RulesSection({ data, onChange }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Observações Importantes</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Observações Importantes</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-muted-foreground">

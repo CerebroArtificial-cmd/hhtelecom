@@ -14,7 +14,7 @@ export default function Documentation({ data, onChange }: DocumentationProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Documentação</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Documentação</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

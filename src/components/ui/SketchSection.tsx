@@ -12,7 +12,7 @@ export default function SketchSection({ data, onChange }: SketchSectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Croqui</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Croqui</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

@@ -292,7 +292,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Checklist de Fotos</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Checklist de Fotos</CardTitle>
         <p className="text-sm text-gray-600">
           <strong>OBS.:</strong> Sempre demarcar a área locada com <em>tira zebrada</em>.
         </p>

@@ -95,7 +95,7 @@ export default function Infrastructure({ data, onChange }: InfrastructureProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Infraestrutura</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Infraestrutura</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">

@@ -71,7 +71,7 @@ export default function ReportForm() {
   const handleSave = () => {
     setSaving(true);
     localStorage.setItem('visitReport', JSON.stringify(formData));
-    toast.success('RelatÃ³rio salvo com sucesso!');
+    toast.success('Relatório salvo com sucesso!');
     setSaving(false);
   };
 
@@ -148,7 +148,7 @@ export default function ReportForm() {
 
   const handleSubmit = async () => {
     if (!isOnline) {
-      toast.error('VocÃª estÃ¡ offline. Envio indisponÃ­vel.');
+      toast.error('Você está offline. Envio indisponível.');
       return;
     }
     try {
@@ -176,11 +176,11 @@ export default function ReportForm() {
       });
       if (!res.ok) {
         const text = await res.text();
-        toast.error('Falha ao enviar RelatÃ³rio');
+        toast.error('Falha ao enviar Relatório');
         console.error('Backend error:', res.status, text);
         return;
       }
-      toast.success('RelatÃ³rio enviado com sucesso!');
+      toast.success('Relatório enviado com sucesso!');
     } catch (err) {
       console.error(err);
       toast.error('Erro ao enviar. Verifique sua conexÃ£o.');
@@ -218,14 +218,14 @@ export default function ReportForm() {
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle className="text-xl sm:text-2xl">RelatÃ³rio de Buscas</CardTitle>
+                <CardTitle className="text-lg sm:text-2xl">Relatório de Buscas</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   Progresso: {pct}% completo
                 </p>
 
                 {!isOnlineSafe && (
                   <p className="text-xs text-amber-700 mt-1">
-                    VocÃª estÃ¡ offline. Ã‰ possÃ­vel salvar/exportar, mas nÃ£o enviar.
+                    Você está offline. É possível salvar/exportar, mas não enviar.
                   </p>
                 )}
               </div>
@@ -265,14 +265,14 @@ export default function ReportForm() {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch]">
-                <TabsList className="flex w-max gap-2 sm:w-full sm:flex-wrap sm:justify-start">
-                <TabsTrigger className="whitespace-nowrap" value="inicio">InformaÃ§Ãµes</TabsTrigger>
-                <TabsTrigger className="whitespace-nowrap" value="documentation">DocumentaÃ§Ã£o</TabsTrigger>
-                <TabsTrigger className="whitespace-nowrap" value="infrastructure">Infraestrutura</TabsTrigger>
-                <TabsTrigger className="whitespace-nowrap" value="security">SeguranÃ§a</TabsTrigger>
-                <TabsTrigger className="whitespace-nowrap" value="photos">Fotos</TabsTrigger>
-                <TabsTrigger className="whitespace-nowrap" value="rules">ObservaÃ§Ãµes</TabsTrigger>
-                <TabsTrigger className="whitespace-nowrap" value="sketch">Croqui</TabsTrigger>
+                <TabsList className="flex w-max gap-2 sm:w-fit sm:flex-wrap sm:justify-start">
+                  <TabsTrigger className="whitespace-nowrap" value="inicio">Informações</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap" value="documentation">Documentação</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap" value="infrastructure">Infraestrutura</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap" value="security">Segurança</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap" value="photos">Fotos</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap" value="rules">Observações</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap" value="sketch">Croqui</TabsTrigger>
                 </TabsList>
               </div>
 
@@ -308,7 +308,7 @@ export default function ReportForm() {
             {activeTab === "sketch" ? (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Revise os dados (nÃ£o Ã© obrigatÃ³rio preencher todos os campos) e envie o RelatÃ³rio.
+                  Revise os dados (não é obrigatório preencher todos os campos) e envie o Relatório.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-end">
                   <Button
@@ -334,7 +334,7 @@ export default function ReportForm() {
             ) : (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Os dados sÃ£o salvos automaticamente no seu navegador. VocÃª pode prosseguir sem preencher todos os campos.
+                  Os dados são salvos automaticamente no seu navegador. Você pode prosseguir sem preencher todos os campos.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-end">
                   {idx > 0 && (
