@@ -264,8 +264,8 @@ export default function ReportForm() {
 
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch]">
-                <TabsList className="flex w-max gap-2 sm:w-fit sm:flex-wrap sm:justify-start">
+              <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible">
+                <TabsList className="flex w-max gap-2 sm:w-full sm:flex-nowrap sm:justify-between">
                   <TabsTrigger className="whitespace-nowrap" value="inicio">Informações</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap" value="documentation">Documentação</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap" value="infrastructure">Infraestrutura</TabsTrigger>
