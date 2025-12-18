@@ -184,7 +184,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                   <Label htmlFor="rooftop">Rooftop</Label>
                 </div>
                 {data.siteType === 'rooftop' && (
-                  <span className="text-xs text-muted-foreground pl-6">Enviar fotos RT.</span>
+                  <span className="text-xs text-muted-foreground pl-6">Enviar fotos RT na aba fotos.</span>
                 )}
               </div>
             </div>
