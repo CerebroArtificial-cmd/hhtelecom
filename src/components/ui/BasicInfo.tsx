@@ -22,14 +22,14 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
     return value === undefined || value === null || value === '';
   };
 
-  const renderStatusOptions = (field: string, options: { value: string; label: string }[]) => (
+  const renderStatusN?Options = (field: string, options: { value: string; label: string }[]) => (
     <div className="flex flex-wrap gap-4">
       {options.map((opt) => (
         <div key={opt.value} className="flex items-center space-x-2">
           <Checkbox
             id={`${field}-${opt.value}`}
             checked={getValue(field) === opt.value}
-            onCheckedChange={(c) => onChange(field, c ? opt.value : 'INFORMAR')}
+            onCheckedChange={(c) => onChange(field, c ? opt.value : 'INFN?ORMAR')}
           />
           <Label htmlFor={`${field}-${opt.value}`}>{opt.label}</Label>
         </div>
@@ -39,7 +39,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
 
   const statusDisablesInput = (field: string) => {
     const status = getValue(field);
-    return status && status !== 'INFORMAR';
+    return status && status !== 'INFN?ORMAR';
   };
 
   const renderYesNo = (field: string, label: string) => (
@@ -51,8 +51,8 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
           <Label htmlFor={`${field}-sim`}>SIM</Label>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox id={`${field}-nao`} checked={getValue(field) === 'NAO'} onCheckedChange={(c) => onChange(field, c ? 'NAO' : '')} />
-          <Label htmlFor={`${field}-nao`}>NÃO</Label>
+          <Checkbox id={`${field}-nao`} checked={getValue(field) === 'NAN?O'} onCheckedChange={(c) => onChange(field, c ? 'NAN?O' : '')} />
+          <Label htmlFor={`${field}-nao`}>NÃN?O</Label>
         </div>
       </div>
     </div>
@@ -77,8 +77,8 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
           <Label htmlFor={`${field}-sim`}>SIM</Label>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox id={`${field}-nao`} checked={getValue(field) === 'NAO'} onCheckedChange={(c) => onChange(field, c ? 'NAO' : '')} />
-          <Label htmlFor={`${field}-nao`}>NÃO</Label>
+          <Checkbox id={`${field}-nao`} checked={getValue(field) === 'NAN?O'} onCheckedChange={(c) => onChange(field, c ? 'NAN?O' : '')} />
+          <Label htmlFor={`${field}-nao`}>NÃN?O</Label>
         </div>
         <div className="flex items-center space-x-2">
           <Checkbox id={`${field}-na`} checked={getValue(field) === 'NA'} onCheckedChange={(c) => onChange(field, c ? 'NA' : '')} />
@@ -91,18 +91,82 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Informações do Site</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Informa??es do Site</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="text-sm font-semibold">Dados gerais</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="siteId">ID do site</Label>
-              <Input id="siteId" value={data.siteId || ''} onChange={(e) => onChange('siteId', e.target.value)} placeholder="Informe o ID do site" />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="siteId">ID do site</Label>
+                <Input id="siteId" value={data.siteId || ''} onChange={(e) => onChange('siteId', e.target.value)} placeholder="Informe o ID do site" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hunter">Hunter</Label>
+                <Input id="hunter" value={getValue('hunter') || ''} onChange={(e) => onChange('hunter', e.target.value)} placeholder="Informe o seu nome" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="operadora">OPERADORA</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="operadora">Operadora</Label>
+                <select
+                  id="operadora"
+                  className={selectClassName}
+                  value={getValue('operadora') || ''}
+                  onChange={(e) => onChange('operadora', e.target.value)}
+                >
+                  <option value="">Selecione</option>
+                  <option value="VIVO">Vivo</option>
+                  <option value="CLARO">Claro</option>
+                  <option value="TIM">Tim</option>
+                  <option value="OI">Oi</option>
+                  <option value="ALGAR_TELECOM">Algar Telecom</option>
+                  <option value="SERCOMTEL">Sercomtel</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>A ?rea est? dentro do searching ring?</Label>
+                <div className="flex space-x-4 pt-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="searchingRing-sim" checked={getValue('searchingRing') === 'SIM'} onCheckedChange={(c) => onChange('searchingRing', c ? 'SIM' : '')} />
+                    <Label htmlFor="searchingRing-sim">Sim</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="searchingRing-nao" checked={getValue('searchingRing') === 'NAO'} onCheckedChange={(c) => onChange('searchingRing', c ? 'NAO' : '')} />
+                    <Label htmlFor="searchingRing-nao">N?o</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 md:w-1/2">
+            <Label htmlFor="sharing">Sharing</Label>
+            <select
+              id="sharing"
+              className={selectClassName}
+              value={getValue('sharing') || ''}
+              onChange={(e) => onChange('sharing', e.target.value)}
+            >
+              <option value="">Selecione</option>
+              <option value="WINITY">WINITY</option>
+              <option value="IHS">IHS</option>
+              <option value="CENTENNIAL">CENTENNIAL</option>
+              <option value="NEXUS">NEXUS</option>
+              <option value="ATC">ATC</option>
+              <option value="SBA">SBA</option>
+              <option value="TBSA">TBSA</option>
+              <option value="DTB">DTB</option>
+              <option value="HIGHLINE">HIGHLINE</option>
+              <option value="BTC">BTC</option>
+              <option value="FIBRASIL">FIBRASIL</option>
+              <option value="QMC / QUEST">QMC / QUEST</option>
+              <option value="GLOBAL">GLOBAL</option>
+            </select>
+          </div>
+<div className="space-y-2">
+              <Label htmlFor="operadora">N?OPERADN?ORA</Label>
               <select
                 id="operadora"
                 className={selectClassName}
@@ -110,17 +174,17 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 onChange={(e) => onChange('operadora', e.target.value)}
               >
                 <option value="">Selecione</option>
-                <option value="VIVO">Vivo</option>
-                <option value="CLARO">Claro</option>
+                <option value="VIVN?O">Vivo</option>
+                <option value="CLARN?O">Claro</option>
                 <option value="TIM">Tim</option>
-                <option value="OI">Oi</option>
-                <option value="ALGAR_TELECOM">Algar Telecom</option>
-                <option value="SERCOMTEL">Sercomtel</option>
+                <option value="N?OI">N?Oi</option>
+                <option value="ALGAR_TELECN?OM">Algar Telecom</option>
+                <option value="SERCN?OMTEL">Sercomtel</option>
                 <option value="ARQIA">Arqia</option>
                 <option value="SURF">Surf</option>
                 <option value="NLT">NLT</option>
                 <option value="TELECALL">Telecall</option>
-                <option value="VERO">Vero</option>
+                <option value="VERN?O">Vero</option>
                 <option value="UNIFIQUE">Unifique</option>
                 <option value="BRISANET">Brisanet</option>
               </select>
@@ -139,9 +203,14 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 <Checkbox id="greenfield" checked={data.siteType === 'greenfield'} onCheckedChange={(c) => onChange('siteType', c ? 'greenfield' : '')} />
                 <Label htmlFor="greenfield">Greenfield</Label>
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="rooftop" checked={data.siteType === 'rooftop'} onCheckedChange={(c) => onChange('siteType', c ? 'rooftop' : '')} />
-                <Label htmlFor="rooftop">Rooftop</Label>
+              <div className="flex flex-col">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="rooftop" checked={data.siteType === 'rooftop'} onCheckedChange={(c) => onChange('siteType', c ? 'rooftop' : '')} />
+                  <Label htmlFor="rooftop">Rooftop</Label>
+                </div>
+                {data.siteType === 'rooftop' && (
+                  <span className="text-xs text-muted-foreground pl-6">Enviar fotos RT.</span>
+                )}
               </div>
             </div>
           </div>
@@ -170,12 +239,12 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="cand">CANDIDATO</Label>
-              <Input id="cand" value={data.cand || ''} onChange={(e) => onChange('cand', e.target.value)} placeholder="Informe o CANDIDATO" />
+              <Label htmlFor="cand">CANDIDATN?O</Label>
+              <Input id="cand" value={data.cand || ''} onChange={(e) => onChange('cand', e.target.value)} placeholder="Informe o CANDIDATN?O" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cord">COORDENADA</Label>
-              <Input id="cord" value={data.cord || ''} onChange={(e) => onChange('cord', e.target.value)} placeholder="Informe a COORDENADA" />
+              <Label htmlFor="cord">CN?ON?ORDENADA</Label>
+              <Input id="cord" value={data.cord || ''} onChange={(e) => onChange('cord', e.target.value)} placeholder="Informe a CN?ON?ORDENADA" />
             </div>
           </div>
 
@@ -209,7 +278,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                   placeholder="Informe o endereço do proprietário"
                   disabled={statusDisablesInput('enderecoProprietarioStatus')}
                 />
-                {renderStatusOptions('enderecoProprietarioStatus', [{ value: 'NI', label: 'N/I' }])}
+                {renderStatusN?Options('enderecoProprietarioStatus', [{ value: 'NI', label: 'N/I' }])}
               </div>
 
               <div className="space-y-2">
@@ -279,7 +348,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                   placeholder="Informe o endereço do representante"
                   disabled={statusDisablesInput('enderecoRepresentanteStatus')}
                 />
-                {renderStatusOptions('enderecoRepresentanteStatus', [
+                {renderStatusN?Options('enderecoRepresentanteStatus', [
                   { value: 'NI', label: 'N/I' },
                   { value: 'NA', label: 'N/A' },
                 ])}
@@ -294,7 +363,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                   placeholder="Informe o CEP do representante"
                   disabled={statusDisablesInput('cepRepresentanteStatus')}
                 />
-                {renderStatusOptions('cepRepresentanteStatus', [
+                {renderStatusN?Options('cepRepresentanteStatus', [
                   { value: 'NI', label: 'N/I' },
                   { value: 'NA', label: 'N/A' },
                 ])}
@@ -309,7 +378,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                   placeholder="Informe o telefone do representante"
                   disabled={statusDisablesInput('telefoneRepresentanteStatus')}
                 />
-                {renderStatusOptions('telefoneRepresentanteStatus', [
+                {renderStatusN?Options('telefoneRepresentanteStatus', [
                   { value: 'NI', label: 'N/I' },
                   { value: 'NA', label: 'N/A' },
                 ])}
@@ -324,7 +393,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                   placeholder="Informe o bairro do representante"
                   disabled={statusDisablesInput('bairroRepresentanteStatus')}
                 />
-                {renderStatusOptions('bairroRepresentanteStatus', [
+                {renderStatusN?Options('bairroRepresentanteStatus', [
                   { value: 'NI', label: 'N/I' },
                   { value: 'NA', label: 'N/A' },
                 ])}
@@ -339,7 +408,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                   placeholder="Informe a cidade do representante"
                   disabled={statusDisablesInput('cidadeRepresentanteStatus')}
                 />
-                {renderStatusOptions('cidadeRepresentanteStatus', [
+                {renderStatusN?Options('cidadeRepresentanteStatus', [
                   { value: 'NI', label: 'N/I' },
                   { value: 'NA', label: 'N/A' },
                 ])}
@@ -354,7 +423,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                   placeholder="Informe o estado do representante"
                   disabled={statusDisablesInput('estadoRepresentanteStatus')}
                 />
-                {renderStatusOptions('estadoRepresentanteStatus', [
+                {renderStatusN?Options('estadoRepresentanteStatus', [
                   { value: 'NI', label: 'N/I' },
                   { value: 'NA', label: 'N/A' },
                 ])}
@@ -377,7 +446,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 <option value="">Selecione</option>
                 <option value="FISICA">Física</option>
                 <option value="JURIDICA">Jurídica</option>
-                <option value="ORGAO_PUBLICO">Órgão público</option>
+                <option value="N?ORGAN?O_PUBLICN?O">Órgão público</option>
               </select>
               {renderRequiredMessage(getValue('tipoPessoa'))}
             </div>
@@ -391,10 +460,10 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 onChange={(e) => onChange('relacaoProprietario', e.target.value)}
               >
                 <option value="">Selecione</option>
-                <option value="IRMAO">Irmão</option>
-                <option value="FILHO">Filho</option>
-                <option value="PRIMO">Primo</option>
-                <option value="OUTRO">Outro</option>
+                <option value="IRMAN?O">Irmão</option>
+                <option value="FILHN?O">Filho</option>
+                <option value="PRIMN?O">Primo</option>
+                <option value="N?OUTRN?O">N?Outro</option>
                 <option value="NA">N/A</option>
               </select>
             </div>
@@ -408,10 +477,10 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 onChange={(e) => onChange('tipoPropriedade', e.target.value)}
               >
                 <option value="">Selecione</option>
-                <option value="TERRENO_URBANO">Terreno urbano</option>
-                <option value="TERRENO_RURAL">Terreno rural</option>
+                <option value="TERREN?O_URBAN?O">Terreno urbano</option>
+                <option value="TERREN?O_RURAL">Terreno rural</option>
                 <option value="AREA_PUBLICA">Área pública</option>
-                <option value="TOPO_PREDIO_SOBRADO">Topo de prédio/sobrado</option>
+                <option value="TN?OPN?O_PREDIN?O_SN?OBRADN?O">Topo de prédio/sobrado</option>
               </select>
               {renderRequiredMessage(getValue('tipoPropriedade'))}
             </div>
@@ -425,9 +494,9 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 onChange={(e) => onChange('estadoConservacao', e.target.value)}
               >
                 <option value="">Selecione</option>
-                <option value="BOM">Bom</option>
+                <option value="BN?OM">Bom</option>
                 <option value="REGULAR">Regular</option>
-                <option value="PESSIMO">Péssimo</option>
+                <option value="PESSIMN?O">Péssimo</option>
               </select>
             </div>
           </div>
@@ -446,8 +515,8 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 <Label htmlFor="edificacaoExistente-sim">SIM</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="edificacaoExistente-nao" checked={getValue('edificacaoExistente') === 'NAO'} onCheckedChange={(c) => onChange('edificacaoExistente', c ? 'NAO' : '')} />
-                <Label htmlFor="edificacaoExistente-nao">NÃO</Label>
+                <Checkbox id="edificacaoExistente-nao" checked={getValue('edificacaoExistente') === 'NAN?O'} onCheckedChange={(c) => onChange('edificacaoExistente', c ? 'NAN?O' : '')} />
+                <Label htmlFor="edificacaoExistente-nao">NÃN?O</Label>
               </div>
             </div>
             {renderRequiredMessage(getValue('edificacaoExistente'))}
@@ -463,7 +532,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
               onChange={(e) => onChange('responsavelDemolicao', e.target.value)}
             >
               <option value="">Selecione</option>
-              <option value="LOCADOR">Locador</option>
+              <option value="LN?OCADN?OR">Locador</option>
               <option value="SHARING">Sharing</option>
               <option value="NA">N/A</option>
             </select>
@@ -490,11 +559,11 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
               onChange={(e) => onChange('tipoEntorno', e.target.value)}
             >
               <option value="">Selecione</option>
-              <option value="COMERCIAL">Comercial</option>
+              <option value="CN?OMERCIAL">Comercial</option>
               <option value="RESIDENCIAL">Residencial</option>
               <option value="INDUSTRIAL">Industrial</option>
-              <option value="MISTO">Misto</option>
-              <option value="OUTRO">Outro</option>
+              <option value="MISTN?O">Misto</option>
+              <option value="N?OUTRN?O">N?Outro</option>
             </select>
           </div>
 
@@ -509,7 +578,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
               onChange={(e) => onChange('responsavelSupressao', e.target.value)}
             >
               <option value="">Selecione</option>
-              <option value="LOCADOR">Locador</option>
+              <option value="LN?OCADN?OR">Locador</option>
               <option value="SHARING">Sharing</option>
               <option value="NA">N/A</option>
             </select>
@@ -517,8 +586,8 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
         </div>
 
         <div className="space-y-4">
-          <div className="text-sm font-semibold">Operadoras e acesso</div>
-          {renderYesNo('outraOperadora500m', 'Outra operadora no raio de 500 m?')}
+          <div className="text-sm font-semibold">N?Operadoras e acesso</div>
+          {renderYesNo('outraN?Operadora500m', 'N?Outra operadora no raio de 500 m?')}
           {renderYesNo('proprietarioImovelEstrutura', 'Proprietário do imóvel e/ou estrutura?')}
 
           <div className="space-y-2">
@@ -530,17 +599,17 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
                 onChange={(e) => onChange('operadorasRaio500m', e.target.value)}
               >
                 <option value="">Selecione</option>
-                <option value="VIVO">Vivo</option>
-                <option value="CLARO">Claro</option>
+                <option value="VIVN?O">Vivo</option>
+                <option value="CLARN?O">Claro</option>
                 <option value="TIM">TIM</option>
-                <option value="OI">Oi</option>
-                <option value="ALGAR_TELECOM">Algar Telecom</option>
-                <option value="SERCOMTEL">Sercomtel</option>
+                <option value="N?OI">N?Oi</option>
+                <option value="ALGAR_TELECN?OM">Algar Telecom</option>
+                <option value="SERCN?OMTEL">Sercomtel</option>
                 <option value="ARQIA">Arqia</option>
                 <option value="SURF">Surf</option>
                 <option value="NLT">NLT</option>
                 <option value="TELECALL">Telecall</option>
-                <option value="VERO">Vero</option>
+                <option value="VERN?O">Vero</option>
                 <option value="UNIFIQUE">Unifique</option>
                 <option value="BRISANET">Brisanet</option>
                 <option value="NA">N/A</option>
@@ -573,7 +642,7 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="observacoes">Observações (ex.: exigências do proprietário, cobertura, telefone fixo)</Label>
+            <Label htmlFor="observacoes">N?Observações (ex.: exigências do proprietário, cobertura, telefone fixo)</Label>
             <Textarea
               id="observacoes"
               value={getValue('observacoes') || ''}

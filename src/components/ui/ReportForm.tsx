@@ -265,14 +265,14 @@ export default function ReportForm() {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible">
-                <TabsList className="flex w-max gap-2 sm:w-full sm:flex-nowrap sm:justify-between">
-                  <TabsTrigger className="whitespace-nowrap" value="inicio">Informações</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap" value="documentation">Documentação</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap" value="infrastructure">Infraestrutura</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap" value="security">Segurança</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap" value="photos">Fotos</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap" value="rules">Observações</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap" value="sketch">Croqui</TabsTrigger>
+                <TabsList className="flex w-max gap-2 sm:w-full sm:gap-2">
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informações</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentação</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Segurança</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observações</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="sketch">Croqui</TabsTrigger>
                 </TabsList>
               </div>
 

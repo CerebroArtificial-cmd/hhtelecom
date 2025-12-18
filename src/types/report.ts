@@ -45,6 +45,10 @@ export interface ReportData {
   /* ===================== DADOS GERAIS ===================== */
   siteId?: string;
   dataVisita?: string;
+  hunter?: string;
+  operadora?: string;
+  sharing?: string;
+  searchingRing?: "SIM" | "NAO";
 
   siteType?: "greenfield" | "rooftop";
 
@@ -179,6 +183,11 @@ export interface ReportData {
 export const emptyReportData: ReportData = {
   siteId: "",
   dataVisita: "",
+  hunter: "",
+  operadora: "",
+  sharing: "",
+  searchingRing: undefined,
+
   siteType: undefined,
 
   cidade: "",
