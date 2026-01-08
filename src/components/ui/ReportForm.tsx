@@ -70,7 +70,7 @@ export default function ReportForm() {
   const handleSave = () => {
     setSaving(true);
     localStorage.setItem('visitReport', JSON.stringify(formData));
-    toast.success('RelatÃ³rio salvo com sucesso!');
+    toast.success('Relatório salvo com sucesso!');
     setSaving(false);
   };
 
@@ -147,11 +147,11 @@ export default function ReportForm() {
 
   const handleSubmit = async () => {
     if (!isOnline) {
-      toast.error('Voce esta offline. Envio indisponivel.');
+      toast.error('Você está offline. Envio indisponível.');
       return;
     }
     if (!API_BASE) {
-      toast.error('Backend nao configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
+      toast.error('Backend não configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
       return;
     }
     try {
@@ -179,14 +179,14 @@ export default function ReportForm() {
       });
       if (!res.ok) {
         const text = await res.text();
-        toast.error('Falha ao enviar RelatÃ³rio');
+        toast.error('Falha ao enviar Relatório');
         console.error('Backend error:', res.status, text);
         return;
       }
-      toast.success('RelatÃ³rio enviado com sucesso!');
+      toast.success('Relatório enviado com sucesso!');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao enviar. Verifique sua conexÃ£o.');
+      toast.error('Erro ao enviar. Verifique sua conexão.');
     }
   };
 
@@ -200,141 +200,177 @@ export default function ReportForm() {
     return false;
   };
 
-  const progressGroups: string[][] = [
-    ['siteId'],
-    ['hunter'],
-    ['operadora'],
-    ['searchingRing'],
-    ['sharing'],
-    ['dataVisita'],
-    ['siteType'],
-    ['cidade'],
-    ['telefone'],
-    ['proprietario'],
-    ['representante'],
-    ['cand'],
-    ['cord'],
-    ['enderecoSite'],
-    ['bairro'],
-    ['cep'],
-    ['enderecoPropriet?rio', 'enderecoPropriet?rioStatus'],
-    ['cepPropriet?rio'],
-    ['telefonePropriet?rio'],
-    ['bairroPropriet?rio'],
-    ['cidadePropriet?rio'],
-    ['estadoPropriet?rio'],
-    ['enderecoRepresentante', 'enderecoRepresentanteStatus'],
-    ['cepRepresentante', 'cepRepresentanteStatus'],
-    ['telefoneRepresentante', 'telefoneRepresentanteStatus'],
-    ['bairroRepresentante', 'bairroRepresentanteStatus'],
-    ['cidadeRepresentante', 'cidadeRepresentanteStatus'],
-    ['estadoRepresentante', 'estadoRepresentanteStatus'],
-    ['tipoPessoa'],
-    ['relacaoPropriet?rio'],
-    ['tipoPropriedade'],
-    ['estadoConservacao'],
-    ['edificacaoExistente'],
-    ['precisaDemolir'],
-    ['responsavelDemolicao'],
-    ['areaLivreUtilizada'],
-    ['dimensoes?reaDisponivel'],
-    ['tipoEntorno'],
-    ['supressaoVegetacao'],
-    ['responsavelSupressao'],
-    ['outraOperadora500m'],
-    ['proprietarioImovelEstrutura'],
-    ['operadorasRaio500m'],
-    ['restricaoAcesso'],
-    ['resumoNegocia??o'],
-    ['observacoes'],
-    ['iptu'],
-    ['itr'],
-    ['iptuItr'],
-    ['escrituraParticular'],
-    ['contratoCompraVenda'],
-    ['matriculaCartorio'],
-    ['escrituraPublica'],
-    ['inventario'],
-    ['contaConcessionaria'],
-    ['docFoto1'],
-    ['docFoto2'],
-    ['docFoto3'],
-    ['docFoto4'],
-    ['tempoDocumento'],
-    ['telefoneDoc'],
-    ['proposta'],
-    ['contraProposta'],
-    ['resumoHistorico'],
-    ['equipamentosEdificacao'],
-    ['projetosEdificacaoDisponiveis'],
-    ['localizacaoSala'],
-    ['salaDesocupada'],
-    ['equipamentosPesadosProximos'],
-    ['arCondicionadoVentilacao'],
-    ['outrosProjetos'],
-    ['dimensoesSala'],
-    ['areaLivreDimensoes'],
-    ['numeroJanelasSala'],
-    ['equipamentoTopoEdificacao'],
-    ['alturaEdificacao'],
-    ['numeroPavimentos'],
-    ['plantasConstrucao'],
-    ['sistemaAterramentoCentral'],
-    ['numeroUnidades'],
-    ['numeroUnidadesDoisTercos'],
-    ['espacoEstocarEquipamentos'],
-    ['passagemCabo'],
-    ['localIndicado'],
-    ['terrenoPlano'],
-    ['arvore?rea'],
-    ['construcao?rea'],
-    ['medidas?rea'],
-    ['coordenadasPontoNominal'],
-    ['energia'],
-    ['numeroTrafo'],
-    ['numeroMedidor'],
-    ['energiaOrigem'],
-    ['privadaPermiteUso'],
-    ['extensaoRede'],
-    ['metrosExtensao'],
-    ['motivoExtensaoAdequacao'],
-    ['energiaTipo'],
-    ['energiaVoltagem'],
-    ['potenciaTrafo'],
-    ['espacoGerador'],
-    ['adequacaoCentroMedicao'],
-    ['concessionariaEnergia'],
-    ['elevador'],
-    ['escada'],
-    ['utilizacaoGuindaste'],
-    ['aberto'],
-    ['especificacoesElevador'],
-    ['capacidadePeso'],
-    ['possibilidadeIcamento'],
-    ['estradaAcesso'],
-    ['larguraAcesso'],
-    ['comprimentoAcessoMelhoria'],
-    ['segurancaLocal'],
-    ['dimensoesPassagem'],
-    ['estacionamentoDisponivel'],
-    ['comentariosAdicionais'],
-    ['comentariosAdicionaisTexto'],
-    ['regraRodovia40'],
-    ['regraRio50'],
-    ['regraColegio50'],
-    ['regraHospital50'],
-    ['regraAreaLivre'],
-    ['regraArvoresEspecie'],
-    ['regrasObs'],
+  const progressSections: { key: string; groups: string[][] }[] = [
+    {
+      key: 'inicio',
+      groups: [
+        ['siteId'],
+        ['hunter'],
+        ['operadora'],
+        ['searchingRing'],
+        ['sharing'],
+        ['dataVisita'],
+        ['siteType'],
+        ['cidade'],
+        ['telefone'],
+        ['proprietario'],
+        ['representante'],
+        ['cand'],
+        ['cord'],
+        ['enderecoSite'],
+        ['bairro'],
+        ['cep'],
+        ['enderecoPropriet?rio', 'enderecoPropriet?rioStatus'],
+        ['cepPropriet?rio'],
+        ['telefonePropriet?rio'],
+        ['bairroPropriet?rio'],
+        ['cidadePropriet?rio'],
+        ['estadoPropriet?rio'],
+        ['enderecoRepresentante', 'enderecoRepresentanteStatus'],
+        ['cepRepresentante', 'cepRepresentanteStatus'],
+        ['telefoneRepresentante', 'telefoneRepresentanteStatus'],
+        ['bairroRepresentante', 'bairroRepresentanteStatus'],
+        ['cidadeRepresentante', 'cidadeRepresentanteStatus'],
+        ['estadoRepresentante', 'estadoRepresentanteStatus'],
+        ['tipoPessoa'],
+        ['relacaoPropriet?rio'],
+        ['tipoPropriedade'],
+        ['estadoConservacao'],
+        ['edificacaoExistente'],
+        ['precisaDemolir'],
+        ['responsavelDemolicao'],
+        ['areaLivreUtilizada'],
+        ['dimensoes?reaDisponivel'],
+        ['tipoEntorno'],
+        ['supressaoVegetacao'],
+        ['responsavelSupressao'],
+        ['outraOperadora500m'],
+        ['proprietarioImovelEstrutura'],
+        ['operadorasRaio500m'],
+        ['restricaoAcesso'],
+        ['resumoNegocia??o'],
+        ['observacoes'],
+      ],
+    },
+    {
+      key: 'documentation',
+      groups: [
+        ['iptu'],
+        ['itr'],
+        ['iptuItr'],
+        ['escrituraParticular'],
+        ['contratoCompraVenda'],
+        ['matriculaCartorio'],
+        ['escrituraPublica'],
+        ['inventario'],
+        ['contaConcessionaria'],
+        ['docFoto1'],
+        ['docFoto2'],
+        ['docFoto3'],
+        ['docFoto4'],
+        ['tempoDocumento'],
+        ['telefoneDoc'],
+        ['proposta'],
+        ['contraProposta'],
+        ['resumoHistorico'],
+      ],
+    },
+    {
+      key: 'infrastructure',
+      groups: [
+        ['equipamentosEdificacao'],
+        ['projetosEdificacaoDisponiveis'],
+        ['localizacaoSala'],
+        ['salaDesocupada'],
+        ['equipamentosPesadosProximos'],
+        ['arCondicionadoVentilacao'],
+        ['outrosProjetos'],
+        ['dimensoesSala'],
+        ['areaLivreDimensoes'],
+        ['numeroJanelasSala'],
+        ['equipamentoTopoEdificacao'],
+        ['alturaEdificacao'],
+        ['numeroPavimentos'],
+        ['plantasConstrucao'],
+        ['sistemaAterramentoCentral'],
+        ['numeroUnidades'],
+        ['numeroUnidadesDoisTercos'],
+        ['espacoEstocarEquipamentos'],
+        ['passagemCabo'],
+        ['localIndicado'],
+        ['terrenoPlano'],
+        ['arvore?rea'],
+        ['construcao?rea'],
+        ['medidas?rea'],
+        ['coordenadasPontoNominal'],
+        ['energia'],
+        ['numeroTrafo'],
+        ['numeroMedidor'],
+        ['energiaOrigem'],
+        ['privadaPermiteUso'],
+        ['extensaoRede'],
+        ['metrosExtensao'],
+        ['motivoExtensaoAdequacao'],
+        ['energiaTipo'],
+        ['energiaVoltagem'],
+        ['potenciaTrafo'],
+        ['espacoGerador'],
+        ['adequacaoCentroMedicao'],
+        ['concessionariaEnergia'],
+      ],
+    },
+    {
+      key: 'security',
+      groups: [
+        ['elevador'],
+        ['escada'],
+        ['utilizacaoGuindaste'],
+        ['aberto'],
+        ['especificacoesElevador'],
+        ['capacidadePeso'],
+        ['possibilidadeIcamento'],
+        ['estradaAcesso'],
+        ['larguraAcesso'],
+        ['comprimentoAcessoMelhoria'],
+        ['segurancaLocal'],
+        ['dimensoesPassagem'],
+        ['estacionamentoDisponivel'],
+        ['comentariosAdicionais'],
+        ['comentariosAdicionaisTexto'],
+      ],
+    },
+    {
+      key: 'photos',
+      groups: [
+        ['photosUploads'],
+      ],
+    },
+    {
+      key: 'rules',
+      groups: [
+        ['regraRodovia40'],
+        ['regraRio50'],
+        ['regraColegio50'],
+        ['regraHospital50'],
+        ['regraAreaLivre'],
+        ['regraArvoresEspecie'],
+        ['regrasObs'],
+      ],
+    },
   ];
 
   const getCompletionPercentage = () => {
     if (!formData || Object.keys(formData).length === 0) return 0;
-    const totalFields = progressGroups.length;
-    const filledFields = progressGroups.filter((group) =>
-      group.some((field) => isFieldFilled((formData as any)[field]))
-    ).length;
-    return Math.round((filledFields / totalFields) * 100);
+    const sectionScores = progressSections.map((section) => {
+      const totalGroups = section.groups.length;
+      if (totalGroups === 0) return 0;
+      const filledGroups = section.groups.filter((group) =>
+        group.some((field) => isFieldFilled((formData as any)[field]))
+      ).length;
+      return filledGroups / totalGroups;
+    });
+    const total = sectionScores.reduce((sum, score) => sum + score, 0);
+    return Math.round((total / progressSections.length) * 100);
   };
 
   const order = ["inicio", "documentation", "infrastructure", "security", "photos", "rules"] as const;
@@ -349,14 +385,14 @@ export default function ReportForm() {
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle className="text-lg sm:text-2xl">RelatÃ³rio de Buscas</CardTitle>
+                <CardTitle className="text-lg sm:text-2xl">Relatório de Buscas</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   Progresso: {pct}% completo
                 </p>
 
                 {!isOnlineSafe && (
                   <p className="text-xs text-amber-700 mt-1">
-                    VocÃª estÃ¡ offline. Ã‰ possÃ­vel salvar/exportar, mas nÃ£o enviar.
+                    Você está offline. É possível salvar/exportar, mas não enviar.
                   </p>
                 )}
               </div>
@@ -397,12 +433,12 @@ export default function ReportForm() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible">
                 <TabsList className="flex w-max gap-0 sm:w-full sm:gap-0">
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">InformaÃ§Ãµes</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">DocumentaÃ§Ã£o</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informações</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentação</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">SeguranÃ§a</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Segurança</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">ObservaÃ§Ãµes</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observações</TabsTrigger>
                 </TabsList>
               </div>
 
@@ -435,7 +471,7 @@ export default function ReportForm() {
             {activeTab === "rules" ? (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Revise os dados (nÃ£o Ã© obrigatÃ³rio preencher todos os campos) e envie o RelatÃ³rio.
+                  Revise os dados (não é obrigatório preencher todos os campos) e envie o Relatório.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-end">
                   <Button
@@ -461,7 +497,7 @@ export default function ReportForm() {
             ) : (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Os dados sÃ£o salvos automaticamente no seu navegador. VocÃª pode prosseguir sem preencher todos os campos.
+                  Os dados são salvos automaticamente no seu navegador. Você pode prosseguir sem preencher todos os campos.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-end">
                   {idx > 0 && (
@@ -485,7 +521,7 @@ export default function ReportForm() {
                     }}
                     disabled={order.indexOf(activeTab as any) >= order.length - 1}
                   >
-                    PrÃ³ximo
+                    Próximo
                   </Button>
                 </div>
               </div>
@@ -518,13 +554,16 @@ export default function ReportForm() {
             </div>
           </div>
 
-          {/* espaÃ§o para nÃ£o cobrir o conteÃºdo */}
+          {/* espaço para não cobrir o conteúdo */}
           <div className="h-[96px]" />
         </div>
       </div>
     </div>
   );
 }
+
+
+
 
 
 

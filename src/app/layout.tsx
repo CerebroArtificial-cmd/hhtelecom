@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toast";
 import { ToastProvider as AppToastProvider } from "@/hooks/use-toast";
 
 export const metadata: Metadata = {
-  title: "CTM | Relatório de Visita Externa",
+  title: "CTM | Relat\u00F3rio de Visita Externa",
   description: "Aplicativo interno para coleta de dados de campo - CTM",
 };
 
@@ -29,7 +29,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AppToastProvider>
             {children}
             {/* Toaster global (UI dos toasts) */}
-            <Toaster />\r\n            <RegisterSW />
+            <Toaster />
+            <RegisterSW />
           </AppToastProvider>
         </main>
 
@@ -41,3 +42,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
