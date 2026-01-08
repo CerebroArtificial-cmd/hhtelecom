@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,7 +9,6 @@ import Documentation from './Documentation';
 import Infrastructure from './Infrastructure';
 import Security from './Security';
 import PhotoChecklist from './PhotoChecklist';
-import SketchSection from './SketchSection';
 import RulesSection from './RulesSection';
 import { clearAllPhotos } from '@/lib/idb';
 
@@ -23,11 +22,11 @@ async function fileToDataURL(file: File): Promise<string> {
 }
 
 export default function ReportForm() {
-  const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+  const API_BASE = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
 
   const [formData, setFormData] = useState<ReportData>({});
   const [activeTab, setActiveTab] = useState('inicio');
-  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
+  const [isOnline, setIsOnline] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -46,16 +45,16 @@ export default function ReportForm() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const on = () => setIsOnline(true);
     const off = () => setIsOnline(false);
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', on);
-      window.addEventListener('offline', off);
-      return () => {
-        window.removeEventListener('online', on);
-        window.removeEventListener('offline', off);
-      };
-    }
+    setIsOnline(navigator.onLine);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
   }, []);
 
   const handleFieldChange = (
@@ -71,7 +70,7 @@ export default function ReportForm() {
   const handleSave = () => {
     setSaving(true);
     localStorage.setItem('visitReport', JSON.stringify(formData));
-    toast.success('Relatório salvo com sucesso!');
+    toast.success('RelatÃ³rio salvo com sucesso!');
     setSaving(false);
   };
 
@@ -148,7 +147,11 @@ export default function ReportForm() {
 
   const handleSubmit = async () => {
     if (!isOnline) {
-      toast.error('Você está offline. Envio indisponível.');
+      toast.error('Voce esta offline. Envio indisponivel.');
+      return;
+    }
+    if (!API_BASE) {
+      toast.error('Backend nao configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
       return;
     }
     try {
@@ -169,44 +172,172 @@ export default function ReportForm() {
         photos[key] = { images, coords: entry.coords };
       }
 
-      const res = await fetch(API_BASE + '/api/relatorios', {
+      const res = await fetch(`${API_BASE}/api/relatorios`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, photosUploads: photos, timestamp_iso: new Date().toISOString() }),
       });
       if (!res.ok) {
         const text = await res.text();
-        toast.error('Falha ao enviar Relatório');
+        toast.error('Falha ao enviar RelatÃ³rio');
         console.error('Backend error:', res.status, text);
         return;
       }
-      toast.success('Relatório enviado com sucesso!');
+      toast.success('RelatÃ³rio enviado com sucesso!');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao enviar. Verifique sua conexão.');
+      toast.error('Erro ao enviar. Verifique sua conexÃ£o.');
     }
   };
 
+  const isFieldFilled = (value: unknown) => {
+    if (typeof value === 'string') return value.trim() !== '';
+    if (typeof value === 'boolean') return value as boolean;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'object' && value !== null) {
+      try { return Object.values(value as any).some((v) => !!v); } catch { return false; }
+    }
+    return false;
+  };
+
+  const progressGroups: string[][] = [
+    ['siteId'],
+    ['hunter'],
+    ['operadora'],
+    ['searchingRing'],
+    ['sharing'],
+    ['dataVisita'],
+    ['siteType'],
+    ['cidade'],
+    ['telefone'],
+    ['proprietario'],
+    ['representante'],
+    ['cand'],
+    ['cord'],
+    ['enderecoSite'],
+    ['bairro'],
+    ['cep'],
+    ['enderecoPropriet?rio', 'enderecoPropriet?rioStatus'],
+    ['cepPropriet?rio'],
+    ['telefonePropriet?rio'],
+    ['bairroPropriet?rio'],
+    ['cidadePropriet?rio'],
+    ['estadoPropriet?rio'],
+    ['enderecoRepresentante', 'enderecoRepresentanteStatus'],
+    ['cepRepresentante', 'cepRepresentanteStatus'],
+    ['telefoneRepresentante', 'telefoneRepresentanteStatus'],
+    ['bairroRepresentante', 'bairroRepresentanteStatus'],
+    ['cidadeRepresentante', 'cidadeRepresentanteStatus'],
+    ['estadoRepresentante', 'estadoRepresentanteStatus'],
+    ['tipoPessoa'],
+    ['relacaoPropriet?rio'],
+    ['tipoPropriedade'],
+    ['estadoConservacao'],
+    ['edificacaoExistente'],
+    ['precisaDemolir'],
+    ['responsavelDemolicao'],
+    ['areaLivreUtilizada'],
+    ['dimensoes?reaDisponivel'],
+    ['tipoEntorno'],
+    ['supressaoVegetacao'],
+    ['responsavelSupressao'],
+    ['outraOperadora500m'],
+    ['proprietarioImovelEstrutura'],
+    ['operadorasRaio500m'],
+    ['restricaoAcesso'],
+    ['resumoNegocia??o'],
+    ['observacoes'],
+    ['iptu'],
+    ['itr'],
+    ['iptuItr'],
+    ['escrituraParticular'],
+    ['contratoCompraVenda'],
+    ['matriculaCartorio'],
+    ['escrituraPublica'],
+    ['inventario'],
+    ['contaConcessionaria'],
+    ['docFoto1'],
+    ['docFoto2'],
+    ['docFoto3'],
+    ['docFoto4'],
+    ['tempoDocumento'],
+    ['telefoneDoc'],
+    ['proposta'],
+    ['contraProposta'],
+    ['resumoHistorico'],
+    ['equipamentosEdificacao'],
+    ['projetosEdificacaoDisponiveis'],
+    ['localizacaoSala'],
+    ['salaDesocupada'],
+    ['equipamentosPesadosProximos'],
+    ['arCondicionadoVentilacao'],
+    ['outrosProjetos'],
+    ['dimensoesSala'],
+    ['areaLivreDimensoes'],
+    ['numeroJanelasSala'],
+    ['equipamentoTopoEdificacao'],
+    ['alturaEdificacao'],
+    ['numeroPavimentos'],
+    ['plantasConstrucao'],
+    ['sistemaAterramentoCentral'],
+    ['numeroUnidades'],
+    ['numeroUnidadesDoisTercos'],
+    ['espacoEstocarEquipamentos'],
+    ['passagemCabo'],
+    ['localIndicado'],
+    ['terrenoPlano'],
+    ['arvore?rea'],
+    ['construcao?rea'],
+    ['medidas?rea'],
+    ['coordenadasPontoNominal'],
+    ['energia'],
+    ['numeroTrafo'],
+    ['numeroMedidor'],
+    ['energiaOrigem'],
+    ['privadaPermiteUso'],
+    ['extensaoRede'],
+    ['metrosExtensao'],
+    ['motivoExtensaoAdequacao'],
+    ['energiaTipo'],
+    ['energiaVoltagem'],
+    ['potenciaTrafo'],
+    ['espacoGerador'],
+    ['adequacaoCentroMedicao'],
+    ['concessionariaEnergia'],
+    ['elevador'],
+    ['escada'],
+    ['utilizacaoGuindaste'],
+    ['aberto'],
+    ['especificacoesElevador'],
+    ['capacidadePeso'],
+    ['possibilidadeIcamento'],
+    ['estradaAcesso'],
+    ['larguraAcesso'],
+    ['comprimentoAcessoMelhoria'],
+    ['segurancaLocal'],
+    ['dimensoesPassagem'],
+    ['estacionamentoDisponivel'],
+    ['comentariosAdicionais'],
+    ['comentariosAdicionaisTexto'],
+    ['regraRodovia40'],
+    ['regraRio50'],
+    ['regraColegio50'],
+    ['regraHospital50'],
+    ['regraAreaLivre'],
+    ['regraArvoresEspecie'],
+    ['regrasObs'],
+  ];
+
   const getCompletionPercentage = () => {
     if (!formData || Object.keys(formData).length === 0) return 0;
-    const ignored = new Set(['photosUploads', 'timestamp_iso']);
-    const values = Object.entries(formData)
-      .filter(([k]) => !ignored.has(k as string))
-      .map(([, v]) => v);
-    const totalFields = 30;
-    const filledFields = values.filter((value) => {
-      if (typeof value === 'string') return value.trim() !== '';
-      if (typeof value === 'boolean') return value as boolean;
-      if (Array.isArray(value)) return value.length > 0;
-      if (typeof value === 'object' && value !== null) {
-        try { return Object.values(value as any).some((v) => !!v); } catch { return false; }
-      }
-      return false;
-    }).length;
+    const totalFields = progressGroups.length;
+    const filledFields = progressGroups.filter((group) =>
+      group.some((field) => isFieldFilled((formData as any)[field]))
+    ).length;
     return Math.round((filledFields / totalFields) * 100);
   };
 
-  const order = ["inicio", "documentation", "infrastructure", "security", "photos", "rules", "sketch"] as const;
+  const order = ["inicio", "documentation", "infrastructure", "security", "photos", "rules"] as const;
   const pct = getCompletionPercentage();
   const idx = order.indexOf(activeTab as any);
   const isOnlineSafe = mounted ? isOnline : true;
@@ -218,14 +349,14 @@ export default function ReportForm() {
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle className="text-lg sm:text-2xl">Relatório de Buscas</CardTitle>
+                <CardTitle className="text-lg sm:text-2xl">RelatÃ³rio de Buscas</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   Progresso: {pct}% completo
                 </p>
 
                 {!isOnlineSafe && (
                   <p className="text-xs text-amber-700 mt-1">
-                    Você está offline. É possível salvar/exportar, mas não enviar.
+                    VocÃª estÃ¡ offline. Ã‰ possÃ­vel salvar/exportar, mas nÃ£o enviar.
                   </p>
                 )}
               </div>
@@ -266,13 +397,12 @@ export default function ReportForm() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible">
                 <TabsList className="flex w-max gap-0 sm:w-full sm:gap-0">
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informações</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentação</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">InformaÃ§Ãµes</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">DocumentaÃ§Ã£o</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Segurança</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">SeguranÃ§a</TabsTrigger>
                   <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observações</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="sketch">Croqui</TabsTrigger>
+                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">ObservaÃ§Ãµes</TabsTrigger>
                 </TabsList>
               </div>
 
@@ -300,15 +430,12 @@ export default function ReportForm() {
                 <RulesSection data={formData as any} onChange={handleFieldChange} />
               </TabsContent>
 
-              <TabsContent value="sketch">
-                <SketchSection data={formData} onChange={handleFieldChange} />
-              </TabsContent>
             </Tabs>
 
-            {activeTab === "sketch" ? (
+            {activeTab === "rules" ? (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Revise os dados (não é obrigatório preencher todos os campos) e envie o Relatório.
+                  Revise os dados (nÃ£o Ã© obrigatÃ³rio preencher todos os campos) e envie o RelatÃ³rio.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-end">
                   <Button
@@ -334,7 +461,7 @@ export default function ReportForm() {
             ) : (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Os dados são salvos automaticamente no seu navegador. Você pode prosseguir sem preencher todos os campos.
+                  Os dados sÃ£o salvos automaticamente no seu navegador. VocÃª pode prosseguir sem preencher todos os campos.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-end">
                   {idx > 0 && (
@@ -358,7 +485,7 @@ export default function ReportForm() {
                     }}
                     disabled={order.indexOf(activeTab as any) >= order.length - 1}
                   >
-                    Próximo
+                    PrÃ³ximo
                   </Button>
                 </div>
               </div>
@@ -391,10 +518,15 @@ export default function ReportForm() {
             </div>
           </div>
 
-          {/* espaço para não cobrir o conteúdo */}
+          {/* espaÃ§o para nÃ£o cobrir o conteÃºdo */}
           <div className="h-[96px]" />
         </div>
       </div>
     </div>
   );
 }
+
+
+
+
+

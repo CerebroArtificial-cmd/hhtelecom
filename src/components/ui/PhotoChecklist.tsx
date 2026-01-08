@@ -153,11 +153,13 @@ function blobToFile(blob: Blob, name = "photo.jpg"): File {
 
 export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) {
   const photos = (data as any).photosUploads || {};
-  const [isOnline, setIsOnline] = React.useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [isOnline, setIsOnline] = React.useState(true);
   const [photoView, setPhotoView] = React.useState<"gf" | "rt" | "360">("gf");
   React.useEffect(() => {
+    if (typeof window === "undefined") return;
     const on = () => setIsOnline(true);
     const off = () => setIsOnline(false);
+    setIsOnline(navigator.onLine);
     window.addEventListener("online", on);
     window.addEventListener("offline", off);
     return () => {

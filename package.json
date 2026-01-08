@@ -28,7 +28,8 @@
                     "dev":  "next dev",
                     "start":  "next start",
                     "setup":  "npm install",
-                    "dev:webpack":  "NEXT_DISABLE_TURBOPACK=1 next dev"
+                    "dev:webpack":  "NEXT_DISABLE_TURBOPACK=1 next dev",
+                    "heroku-postbuild":  "npm run build"
                 },
     "engines":  {
                     "node":  "20.x",
