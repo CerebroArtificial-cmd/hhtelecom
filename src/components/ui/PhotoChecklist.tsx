@@ -6,7 +6,6 @@ import { Label } from "./label";
 import { Input } from "./input";
 import { Button } from "./button";
 import type { ReportData } from "@/types/report";
-import { savePhotos, loadPhotos } from "@/lib/idb";
 
 type PhotoEntry = {
   files?: File[];
@@ -138,35 +137,9 @@ async function compressImage(file: File, quality = 0.85): Promise<File> {
   }
 }
 
-async function fileToDataURL(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function blobToFile(blob: Blob, name = "photo.jpg"): File {
-  return new File([blob], name, { type: blob.type || "image/jpeg" });
-}
-
 export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) {
   const photos = (data as any).photosUploads || {};
-  const [isOnline, setIsOnline] = React.useState(true);
   const [photoView, setPhotoView] = React.useState<"gf" | "rt" | "360">("gf");
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    const on = () => setIsOnline(true);
-    const off = () => setIsOnline(false);
-    setIsOnline(navigator.onLine);
-    window.addEventListener("online", on);
-    window.addEventListener("offline", off);
-    return () => {
-      window.removeEventListener("online", on);
-      window.removeEventListener("offline", off);
-    };
-  }, []);
 
   const setEntry = (id: string, partial: Partial<PhotoEntry>) => {
     const next = { ...photos, [id]: { ...(photos[id] || {}), ...partial } };
@@ -181,16 +154,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     const processed: File[] = [];
     for (const f of files) processed.push(await compressImage(f, 0.85));
 
-    try {
-      const urls: string[] = [];
-      for (const f of processed) urls.push(await fileToDataURL(f));
-      setEntry(id, { files: processed, urls });
-      await savePhotos(id, processed);
-    } catch (e: any) {
-      alert(`Falha ao processar imagens: ${e?.message || e}`);
-      setEntry(id, { files: processed });
-      await savePhotos(id, processed);
-    }
+    setEntry(id, { files: processed, urls: [] });
 
     if (minCount && processed.length < minCount) {
       alert(`Selecione pelo menos ${minCount} foto(s) para "${id}".`);
@@ -209,23 +173,13 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
       currentFiles[angleIndex] = undefined as any;
       currentUrls[angleIndex] = undefined as any;
       setEntry(id, { files: currentFiles, urls: currentUrls });
-      await savePhotos(`${id}:${angleIndex}`, []);
       return;
     }
 
     const processed = await compressImage(file, 0.85);
-    try {
-      const url = await fileToDataURL(processed);
-      currentFiles[angleIndex] = processed;
-      currentUrls[angleIndex] = url;
-      setEntry(id, { files: currentFiles, urls: currentUrls });
-      await savePhotos(`${id}:${angleIndex}`, [processed]);
-    } catch (e: any) {
-      alert(`Falha no upload/processamento: ${e?.message || e}`);
-      currentFiles[angleIndex] = processed;
-      setEntry(id, { files: currentFiles, urls: currentUrls });
-      await savePhotos(`${id}:${angleIndex}`, [processed]);
-    }
+    currentFiles[angleIndex] = processed;
+    currentUrls[angleIndex] = undefined as any;
+    setEntry(id, { files: currentFiles, urls: currentUrls });
   };
 
   const onFileForSlot = async (id: string, slotIndex: number, fileList: FileList | null) => {
@@ -238,23 +192,13 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
       currentFiles[slotIndex] = undefined as any;
       currentUrls[slotIndex] = undefined as any;
       setEntry(id, { files: currentFiles, urls: currentUrls });
-      await savePhotos(`${id}:${slotIndex}`, []);
       return;
     }
 
     const processed = await compressImage(file, 0.85);
-    try {
-      const url = await fileToDataURL(processed);
-      currentFiles[slotIndex] = processed;
-      currentUrls[slotIndex] = url;
-      setEntry(id, { files: currentFiles, urls: currentUrls });
-      await savePhotos(`${id}:${slotIndex}`, [processed]);
-    } catch (e: any) {
-      alert(`Falha no upload/processamento: ${e?.message || e}`);
-      currentFiles[slotIndex] = processed;
-      setEntry(id, { files: currentFiles, urls: currentUrls });
-      await savePhotos(`${id}:${slotIndex}`, [processed]);
-    }
+    currentFiles[slotIndex] = processed;
+    currentUrls[slotIndex] = undefined as any;
+    setEntry(id, { files: currentFiles, urls: currentUrls });
   };
 
   const handleUseGPS = (id: string) => {
@@ -273,58 +217,6 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
-
-  // Carregar do IndexedDB ao montar
-  React.useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      for (const item of photoFields) {
-        if (IS_360.has(item.id)) {
-          const entry: PhotoEntry = photos[item.id] || {};
-          const newFiles: File[] = Array.from(entry.files || []);
-          for (let i = 0; i < ANGLES.length; i++) {
-            const blobs = await loadPhotos(`${item.id}:${i}`);
-            if (cancelled) return;
-            if (blobs && blobs[0]) newFiles[i] = blobToFile(blobs[0], `angle-${i}.jpg`);
-          }
-          if (newFiles.some(Boolean)) setEntry(item.id, { files: newFiles });
-          continue;
-        }
-
-        if (item.fixedSlots) {
-          const entry: PhotoEntry = photos[item.id] || {};
-          let newFiles: File[] = Array.from(entry.files || []);
-          let loadedAny = false;
-          for (let i = 0; i < item.fixedSlots; i++) {
-            const blobs = await loadPhotos(`${item.id}:${i}`);
-            if (cancelled) return;
-            if (blobs && blobs[0]) {
-              newFiles[i] = blobToFile(blobs[0], `slot-${i + 1}.jpg`);
-              loadedAny = true;
-            }
-          }
-          if (!loadedAny) {
-            const blobs = await loadPhotos(item.id);
-            if (cancelled) return;
-            if (blobs && blobs.length > 0) {
-              newFiles = blobs.slice(0, item.fixedSlots).map((b, i) => blobToFile(b, `photo-${i + 1}.jpg`));
-              loadedAny = true;
-            }
-          }
-          if (loadedAny) setEntry(item.id, { files: newFiles });
-          continue;
-        }
-
-        const blobs = await loadPhotos(item.id);
-        if (cancelled) return;
-        if (blobs && blobs.length > 0) {
-          const files = blobs.map((b, i) => blobToFile(b, `photo-${i + 1}.jpg`));
-          setEntry(item.id, { files });
-        }
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const visibleFields = photoView === "360"
     ? photoFields.filter((item) => GROUP_360.has(item.id))
@@ -361,14 +253,6 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
         <p className="text-sm text-gray-600">
           <strong>OBS.:</strong> Sempre demarcar a área locada com <em>tira zebrada</em>.
         </p>
-        <div className="mt-1 flex flex-col gap-1">
-          {!isOnline && (
-            <p className="text-xs text-amber-700 mt-1">
-              Modo offline: fotos serão salvas localmente e não serão enviadas agora.
-            </p>
-          )}
-          <p className="mt-1 text-xs text-gray-500">As fotos ficam salvas localmente no dispositivo.</p>
-        </div>
       </CardHeader>
 
       <CardContent>

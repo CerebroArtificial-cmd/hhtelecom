@@ -1,6 +1,6 @@
 export type PhotoEntry = {
   files?: File[]; // usado no client (não enviar pro backend)
-  urls?: string[]; // dataURL (offline) ou URL gerada no envio
+  urls?: string[]; // dataURL ou URL gerada no envio
   coordsText?: string; // "-23.550520, -46.633310"
   coords?: { lat: number; lng: number };
 };

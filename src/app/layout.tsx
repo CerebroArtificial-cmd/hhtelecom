@@ -9,8 +9,6 @@ export const metadata: Metadata = {
   description: "Aplicativo interno para coleta de dados de campo - CTM",
 };
 
-import RegisterSW from './register-sw';
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
@@ -30,7 +28,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             {/* Toaster global (UI dos toasts) */}
             <Toaster />
-            <RegisterSW />
           </AppToastProvider>
         </main>
 

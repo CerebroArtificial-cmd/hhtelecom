@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,7 +10,6 @@ import Infrastructure from './Infrastructure';
 import Security from './Security';
 import PhotoChecklist from './PhotoChecklist';
 import RulesSection from './RulesSection';
-import { clearAllPhotos } from '@/lib/idb';
 
 async function fileToDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -26,36 +25,24 @@ export default function ReportForm() {
 
   const [formData, setFormData] = useState<ReportData>({});
   const [activeTab, setActiveTab] = useState('inicio');
-  const [isOnline, setIsOnline] = useState(true);
-  const [mounted, setMounted] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const importRef = useRef<HTMLInputElement | null>(null);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const formDataRef = useRef(formData);
+  const draftIdRef = useRef(draftId);
+  const savingDraftRef = useRef(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadTotal, setUploadTotal] = useState(0);
+  const [uploadDone, setUploadDone] = useState(0);
 
   useEffect(() => {
-    const savedData = localStorage.getItem('visitReport');
-    if (savedData) {
-      try {
-        setFormData(JSON.parse(savedData));
-      } catch (error) {
-        console.error('Erro ao carregar dados salvos:', error);
-      }
-    }
-    setMounted(true);
-  }, []);
+    formDataRef.current = formData;
+  }, [formData]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const on = () => setIsOnline(true);
-    const off = () => setIsOnline(false);
-    setIsOnline(navigator.onLine);
-    window.addEventListener('online', on);
-    window.addEventListener('offline', off);
-    return () => {
-      window.removeEventListener('online', on);
-      window.removeEventListener('offline', off);
-    };
-  }, []);
+    draftIdRef.current = draftId;
+  }, [draftId]);
 
   const handleFieldChange = (
     field: string,
@@ -67,36 +54,31 @@ export default function ReportForm() {
     }));
   };
 
-  const handleSave = () => {
-    setSaving(true);
-    localStorage.setItem('visitReport', JSON.stringify(formData));
-    toast.success('Relatório salvo com sucesso!');
-    setSaving(false);
-  };
-
-  const handleClear = async () => {
+  const handleClear = () => {
     if (window.confirm('Tem certeza que deseja limpar todos os dados?')) {
       setFormData({});
-      localStorage.removeItem('visitReport');
-      await clearAllPhotos();
       toast.success('Dados limpos com sucesso!');
     }
   };
 
-  const serializeForExport = async (data: ReportData) => {
+  const serializeForExport = async (
+    data: ReportData,
+    options: { includeFileData?: boolean } = {}
+  ) => {
+    const includeFileData = options.includeFileData ?? true;
     const copy: any = JSON.parse(JSON.stringify(data || {}));
     const ph = (data as any).photosUploads || {};
     const outPhotos: Record<string, any> = {};
     for (const key of Object.keys(ph)) {
       const entry = ph[key] || {};
       if (entry.urls && entry.urls.length > 0) {
-        outPhotos[key] = { ...entry, urls: entry.urls };
-      } else if (entry.files && entry.files.length > 0) {
+        outPhotos[key] = { ...entry, urls: entry.urls, files: undefined };
+      } else if (includeFileData && entry.files && entry.files.length > 0) {
         const urls: string[] = [];
         for (const f of entry.files as File[]) urls.push(await fileToDataURL(f));
         outPhotos[key] = { ...entry, urls, files: undefined };
       } else {
-        outPhotos[key] = entry;
+        outPhotos[key] = { ...entry, files: undefined };
       }
     }
     copy.photosUploads = outPhotos;
@@ -106,7 +88,7 @@ export default function ReportForm() {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const payload = await serializeForExport(formData);
+      const payload = await serializeForExport(formData, { includeFileData: true });
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -124,36 +106,136 @@ export default function ReportForm() {
     setExporting(false);
   };
 
-  const handleImportClick = () => {
-    importRef.current?.click();
+  const uploadFileToStorage = async (file: File): Promise<string> => {
+    if (!API_BASE) {
+      throw new Error('Backend nao configurado.');
+    }
+    const siteId = (formDataRef.current as any)?.siteId;
+    const presignRes = await fetch(`${API_BASE}/api/uploads/presign`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: file.name,
+        content_type: file.type || "application/octet-stream",
+        site_id: siteId,
+        draft_id: draftIdRef.current,
+      }),
+    });
+    if (!presignRes.ok) {
+      const text = await presignRes.text();
+      throw new Error(text || "Falha ao gerar URL de upload.");
+    }
+    const presign = await presignRes.json();
+    const uploadRes = await fetch(presign.upload_url, {
+      method: "PUT",
+      headers: { "Content-Type": file.type || "application/octet-stream" },
+      body: file,
+    });
+    if (!uploadRes.ok) {
+      throw new Error("Falha ao enviar a foto para o storage.");
+    }
+    return presign.public_url;
   };
 
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleSaveDraft = async (silent = false) => {
+    if (!API_BASE) {
+      if (!silent) toast.error('Backend nao configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
+      return;
+    }
+    const currentData = formDataRef.current;
+    if (!currentData || Object.keys(currentData).length === 0) {
+      return;
+    }
+    if (savingDraftRef.current) {
+      return;
+    }
+    savingDraftRef.current = true;
+    if (!silent) setSavingDraft(true);
     try {
-      const text = await file.text();
-      const json = JSON.parse(text);
-      setFormData(json);
-      localStorage.setItem('visitReport', JSON.stringify(json));
-      toast.success('Dados importados com sucesso!');
-    } catch (e: any) {
-      console.error(e);
-      toast.error('Falha ao importar JSON.');
+      const payload = await serializeForExport(currentData, { includeFileData: false });
+      const currentDraftId = draftIdRef.current;
+      const res = await fetch(`${API_BASE}/api/rascunhos${currentDraftId ? `/${currentDraftId}` : ''}`, {
+        method: currentDraftId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, status: 'draft', timestamp_iso: new Date().toISOString() }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        console.error('Draft error:', res.status, text);
+        if (!silent) toast.error('Falha ao salvar rascunho.');
+        return;
+      }
+      const data = await res.json();
+      if (data?.id) setDraftId(data.id);
+      if (!silent) toast.success('Rascunho salvo no servidor.');
+    } catch (err) {
+      console.error(err);
+      if (!silent) toast.error('Erro ao salvar rascunho.');
     } finally {
-      if (importRef.current) importRef.current.value = '';
+      savingDraftRef.current = false;
+      if (!silent) setSavingDraft(false);
     }
   };
+
+  const handleLoadDraft = async () => {
+    if (!API_BASE) {
+      toast.error('Backend nao configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
+      return;
+    }
+    setLoadingDraft(true);
+    try {
+      const siteId = (formData as any)?.siteId;
+      const url = siteId
+        ? `${API_BASE}/api/rascunhos/ultimo?site_id=${encodeURIComponent(siteId)}`
+        : `${API_BASE}/api/rascunhos/ultimo`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        const text = await res.text();
+        console.error('Draft load error:', res.status, text);
+        toast.error('Rascunho nao encontrado.');
+        return;
+      }
+      const data = await res.json();
+      const payload = data?.payload || {};
+      setFormData(payload);
+      if (data?.id) setDraftId(data.id);
+      setActiveTab('inicio');
+      toast.success('Rascunho carregado.');
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao carregar rascunho.');
+    } finally {
+      setLoadingDraft(false);
+    }
+  };
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      void handleSaveDraft(true);
+    }, 10000);
+    return () => clearInterval(id);
+  }, [API_BASE]);
 
   const handleSubmit = async () => {
-    if (!isOnline) {
-      toast.error('Você está offline. Envio indisponível.');
-      return;
-    }
     if (!API_BASE) {
-      toast.error('Backend não configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
+      toast.error('Backend n?o configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
       return;
     }
+    const siteId = (formData as any)?.siteId;
+    if (!siteId || String(siteId).trim() === "") {
+      toast.error('Informe o siteId antes de enviar.');
+      return;
+    }
+    const photosPayload = (formData as any).photosUploads || {};
+    const totalUploads = Object.values(photosPayload).reduce((sum: number, entry: any) => {
+      const urls: string[] = entry?.urls || [];
+      const files: File[] = entry?.files || [];
+      if (urls.length > 0) return sum;
+      return sum + files.length;
+    }, 0);
+    setUploading(true);
+    setUploadTotal(totalUploads);
+    setUploadDone(0);
     try {
       const photos: any = {};
       const ph = (formData as any).photosUploads || {};
@@ -161,13 +243,18 @@ export default function ReportForm() {
         const entry = ph[key] || {};
         const urls: string[] = (entry as any).urls || [];
         const files: File[] = (entry as any).files || [];
-        const images: string[] = [];
+        let images: string[] = [];
         if (urls.length > 0) {
-          images.push(...urls);
-        } else {
-          for (const f of files) {
-            images.push(await fileToDataURL(f));
-          }
+          images = [...urls];
+        } else if (files.length > 0) {
+          const uploaded = await Promise.all(
+            files.map(async (f) => {
+              const url = await uploadFileToStorage(f);
+              setUploadDone((prev) => prev + 1);
+              return url;
+            })
+          );
+          images = uploaded;
         }
         photos[key] = { images, coords: entry.coords };
       }
@@ -179,14 +266,18 @@ export default function ReportForm() {
       });
       if (!res.ok) {
         const text = await res.text();
-        toast.error('Falha ao enviar Relatório');
+        toast.error('Falha ao enviar Relat?rio');
         console.error('Backend error:', res.status, text);
         return;
       }
-      toast.success('Relatório enviado com sucesso!');
+      toast.success('Relat?rio enviado com sucesso!');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao enviar. Verifique sua conexão.');
+      toast.error('Erro ao enviar. Verifique sua conex?o.');
+    } finally {
+      setUploading(false);
+      setUploadTotal(0);
+      setUploadDone(0);
     }
   };
 
@@ -376,25 +467,35 @@ export default function ReportForm() {
   const order = ["inicio", "documentation", "infrastructure", "security", "photos", "rules"] as const;
   const pct = getCompletionPercentage();
   const idx = order.indexOf(activeTab as any);
-  const isOnlineSafe = mounted ? isOnline : true;
+  const uploadPct = uploadTotal > 0 ? Math.round((uploadDone / uploadTotal) * 100) : 0;
+  const handleTabChange = (value: string) => {
+    if (uploading) return;
+    setActiveTab(value);
+  };
 
   return (
     <div className="safe-top safe-bottom">
       <div className="mx-auto w-full max-w-[var(--app-max)] px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        {uploading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="rounded-lg bg-white px-5 py-4 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+                <div className="text-sm text-gray-800">
+                  Enviando... {uploadTotal > 0 ? `${uploadDone}/${uploadTotal}` : ""}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle className="text-lg sm:text-2xl">Relatório de Buscas</CardTitle>
+                <CardTitle className="text-lg sm:text-2xl">Relat?rio de Buscas</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   Progresso: {pct}% completo
                 </p>
-
-                {!isOnlineSafe && (
-                  <p className="text-xs text-amber-700 mt-1">
-                    Você está offline. É possível salvar/exportar, mas não enviar.
-                  </p>
-                )}
               </div>
 
               <div className="hidden sm:flex gap-2 sm:gap-3 sm:justify-end">
@@ -404,16 +505,27 @@ export default function ReportForm() {
 
                 <Button
                   type="button"
-                  onClick={handleSave}
-                  className="h-9 flex-1 sm:flex-none bg-[#D9452F] hover:bg-[#bf3a29] text-white"
+                  variant="outline"
+                  onClick={handleLoadDraft}
+                  disabled={loadingDraft || uploading}
+                  className="h-9"
                 >
-                  {saving ? "Salvando..." : "Salvar"}
+                  {loadingDraft ? "Carregando..." : "Carregar rascunho"}
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  disabled={savingDraft || uploading}
+                  className="h-9 bg-[#6b7280] hover:bg-[#4b5563] text-white"
+                >
+                  {savingDraft ? "Salvando..." : "Salvar rascunho"}
                 </Button>
 
                 <Button
                   type="button"
                   onClick={handleExport}
-                  disabled={exporting}
+                  disabled={exporting || uploading}
                   className="h-9 bg-[#0f766e] hover:bg-[#0c5f59] text-white"
                 >
                   {exporting ? "Exportando..." : "Exportar"}
@@ -427,18 +539,42 @@ export default function ReportForm() {
                 style={{ width: `${pct}%`, backgroundColor: "#77807a" }}
               />
             </div>
+            {uploading && uploadTotal > 0 && (
+              <div className="mt-2">
+                <div className="h-2 w-full bg-amber-100 rounded">
+                  <div
+                    className="h-full rounded bg-amber-500 transition-[width] duration-200"
+                    style={{ width: `${uploadPct}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-amber-700">
+                  Enviando fotos: {uploadDone}/{uploadTotal}
+                </p>
+              </div>
+            )}
+            <div className="mt-2 flex justify-end sm:hidden">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleLoadDraft}
+                disabled={loadingDraft || uploading}
+                className="h-8 px-3 text-xs"
+              >
+                {loadingDraft ? "Carregando..." : "Carregar rascunho"}
+              </Button>
+            </div>
           </CardHeader>
 
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
               <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible">
                 <TabsList className="flex w-max gap-0 sm:w-full sm:gap-0">
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informações</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentação</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Segurança</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
-                  <TabsTrigger className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observações</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informa??es</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documenta??o</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Seguran?a</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observa??es</TabsTrigger>
                 </TabsList>
               </div>
 
@@ -471,12 +607,13 @@ export default function ReportForm() {
             {activeTab === "rules" ? (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Revise os dados (não é obrigatório preencher todos os campos) e envie o Relatório.
+                  Revise os dados (n?o ? obrigat?rio preencher todos os campos) e envie o Relat?rio.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-end">
                   <Button
                     variant="outline"
                     className="w-full sm:w-auto"
+                    disabled={uploading}
                     onClick={() => {
                       const i = order.indexOf(activeTab as any);
                       if (i > 0) setActiveTab(order[i - 1]);
@@ -488,22 +625,29 @@ export default function ReportForm() {
                   <Button
                     className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto"
                     onClick={handleSubmit}
-                    disabled={!isOnlineSafe}
+                    disabled={uploading}
                   >
-                    Enviar
+                    {uploading ? "Enviando..." : "Enviar"}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Os dados são salvos automaticamente no seu navegador. Você pode prosseguir sem preencher todos os campos.
+                  Preencha os campos e avance; o envio ocorre no final.
                 </p>
+                {uploading && (
+                  <p className="text-xs text-amber-700">
+                    Upload em andamento. Aguarde a conclus?o.
+                    {uploadTotal > 0 ? ` (${uploadDone}/${uploadTotal})` : ""}
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-2 justify-end">
                   {idx > 0 && (
                     <Button
                       variant="outline"
                       className="w-full sm:w-auto"
+                      disabled={uploading}
                       onClick={() => {
                         const i = order.indexOf(activeTab as any);
                         if (i > 0) setActiveTab(order[i - 1]);
@@ -519,9 +663,9 @@ export default function ReportForm() {
                       const i = order.indexOf(activeTab as any);
                       if (i < order.length - 1) setActiveTab(order[i + 1]);
                     }}
-                    disabled={order.indexOf(activeTab as any) >= order.length - 1}
+                    disabled={uploading || order.indexOf(activeTab as any) >= order.length - 1}
                   >
-                    Próximo
+                    Pr?ximo
                   </Button>
                 </div>
               </div>
@@ -533,39 +677,32 @@ export default function ReportForm() {
         <div className="sm:hidden">
           <div className="fixed left-0 right-0 bottom-0 safe-bottom bg-background/95 backdrop-blur border-t">
             <div className="mx-auto max-w-[var(--app-max)] px-3 py-3 flex gap-2">
-              <Button variant="outline" className="h-11 w-1/3" onClick={handleClear}>
+              <Button variant="outline" className="h-11 w-1/3" onClick={handleClear} disabled={uploading}>
                 Limpar
               </Button>
 
               <Button
-                className="h-11 w-1/3 bg-[#D9452F] hover:bg-[#bf3a29] text-white"
-                onClick={handleSave}
+                className="h-11 w-1/3 bg-[#6b7280] hover:bg-[#4b5563] text-white"
+                onClick={handleSaveDraft}
+                disabled={savingDraft || uploading}
               >
-                {saving ? "Salvando..." : "Salvar"}
+                {savingDraft ? "Salvando..." : "Rascunho"}
               </Button>
 
               <Button
                 className="h-11 w-1/3 bg-[#0f766e] hover:bg-[#0c5f59] text-white"
                 onClick={handleExport}
-                disabled={exporting}
+                disabled={exporting || uploading}
               >
                 {exporting ? "Exportando..." : "Exportar"}
               </Button>
             </div>
           </div>
 
-          {/* espaço para não cobrir o conteúdo */}
+          {/* espa?o para n?o cobrir o conte?do */}
           <div className="h-[96px]" />
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
