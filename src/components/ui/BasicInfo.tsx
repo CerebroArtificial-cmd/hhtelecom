@@ -622,11 +622,11 @@ export default function BasicInfo({ data, onChange }: BasicInfoProps) {
         <div className="space-y-4">
           <div className="text-sm font-semibold">Negociação e observações</div>
           <div className="space-y-2">
-            <Label htmlFor="resumoNegocia??o">Resumo sobre a negociação</Label>
+            <Label htmlFor="resumoNegociacao">Resumo sobre a negociação</Label>
             <Textarea
-              id="resumoNegocia??o"
-              value={getValue('resumoNegocia??o') || ''}
-              onChange={(e) => onChange('resumoNegocia??o', e.target.value)}
+              id="resumoNegociacao"
+              value={getValue('resumoNegociacao') || ''}
+              onChange={(e) => onChange('resumoNegociacao', e.target.value)}
               placeholder="Informe o resumo da negociação"
               rows={3}
             />

@@ -218,7 +218,7 @@ export default function ReportForm() {
 
   const handleSubmit = async () => {
     if (!API_BASE) {
-      toast.error('Backend n?o configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
+      toast.error('Backend não configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
       return;
     }
     const siteId = (formData as any)?.siteId;
@@ -266,14 +266,14 @@ export default function ReportForm() {
       });
       if (!res.ok) {
         const text = await res.text();
-        toast.error('Falha ao enviar Relat?rio');
+        toast.error('Falha ao enviar Relatório');
         console.error('Backend error:', res.status, text);
         return;
       }
-      toast.success('Relat?rio enviado com sucesso!');
+      toast.success('Relatório enviado com sucesso!');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao enviar. Verifique sua conex?o.');
+      toast.error('Erro ao enviar. Verifique sua conexão.');
     } finally {
       setUploading(false);
       setUploadTotal(0);
@@ -339,7 +339,7 @@ export default function ReportForm() {
         ['proprietarioImovelEstrutura'],
         ['operadorasRaio500m'],
         ['restricaoAcesso'],
-        ['resumoNegocia??o'],
+        ['resumoNegociacao'],
         ['observacoes'],
       ],
     },
@@ -492,7 +492,7 @@ export default function ReportForm() {
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle className="text-lg sm:text-2xl">Relat?rio de Buscas</CardTitle>
+                <CardTitle className="text-lg sm:text-2xl">Relatório de Buscas</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   Progresso: {pct}% completo
                 </p>
@@ -569,12 +569,12 @@ export default function ReportForm() {
             <Tabs value={activeTab} onValueChange={handleTabChange}>
               <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible">
                 <TabsList className="flex w-max gap-0 sm:w-full sm:gap-0">
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informa??es</TabsTrigger>
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documenta??o</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informações</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentação</TabsTrigger>
                   <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Seguran?a</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Segurança</TabsTrigger>
                   <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observa??es</TabsTrigger>
+                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observações</TabsTrigger>
                 </TabsList>
               </div>
 
@@ -607,7 +607,7 @@ export default function ReportForm() {
             {activeTab === "rules" ? (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Revise os dados (n?o ? obrigat?rio preencher todos os campos) e envie o Relat?rio.
+                  Revise os dados (não é obrigatório preencher todos os campos) e envie o Relatório.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-end">
                   <Button
@@ -638,7 +638,7 @@ export default function ReportForm() {
                 </p>
                 {uploading && (
                   <p className="text-xs text-amber-700">
-                    Upload em andamento. Aguarde a conclus?o.
+                    Upload em andamento. Aguarde a conclusão.
                     {uploadTotal > 0 ? ` (${uploadDone}/${uploadTotal})` : ""}
                   </p>
                 )}
@@ -665,7 +665,7 @@ export default function ReportForm() {
                     }}
                     disabled={uploading || order.indexOf(activeTab as any) >= order.length - 1}
                   >
-                    Pr?ximo
+                    Próximo
                   </Button>
                 </div>
               </div>
@@ -699,7 +699,7 @@ export default function ReportForm() {
             </div>
           </div>
 
-          {/* espa?o para n?o cobrir o conte?do */}
+          {/* espaço para não cobrir o conteúdo */}
           <div className="h-[96px]" />
         </div>
       </div>
