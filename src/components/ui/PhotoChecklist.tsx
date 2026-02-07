@@ -399,7 +399,7 @@ async function compressImage(file: File, quality = 0.85): Promise<File> {
 
 
 
-export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) {
+export default function PhotoChecklist({ data, onChange, onAutoSave }: PhotoChecklistProps) {
 
 
   const photos = (data as any).photosUploads || {};
@@ -523,6 +523,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
 
 
     setEntry(id, { files: processed, urls: [], names });
+    if (onAutoSave) onAutoSave(true);
 
 
 
@@ -583,6 +584,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
 
 
       setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
+    if (onAutoSave) onAutoSave(true);
 
 
       return;
@@ -613,6 +615,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
 
 
     setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
+    if (onAutoSave) onAutoSave(true);
 
 
   };
@@ -655,6 +658,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
 
 
       setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
+    if (onAutoSave) onAutoSave(true);
 
 
       return;
@@ -685,6 +689,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
 
 
     setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
+    if (onAutoSave) onAutoSave(true);
 
 
   };

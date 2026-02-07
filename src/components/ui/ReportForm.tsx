@@ -1192,7 +1192,7 @@ export default function ReportForm() {
 
               <TabsContent value="photos">
 
-                <PhotoChecklist data={formData} onChange={handleFieldChange} />
+                <PhotoChecklist data={formData} onChange={handleFieldChange} onAutoSave={handleSaveDraft} />
 
               </TabsContent>
 
