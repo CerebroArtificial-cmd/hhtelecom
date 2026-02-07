@@ -50,8 +50,9 @@ function buildPhotoMeta(data: ReportData) {
     const entry = ph[key] || {};
     const files: File[] = entry.files || [];
     const urls: string[] = entry.urls || [];
+    const names: string[] = entry.names || [];
     out[key] = {
-      file_names: files.map((f) => f.name || `${key}.jpg`),
+      file_names: names.length > 0 ? names : files.map((f) => f.name || `${key}.jpg`),
       urls,
       coords: entry.coords || null,
     };
@@ -72,12 +73,15 @@ function makeOfflinePhotos(reportId: string, data: ReportData, status: "draft" |
   for (const key of Object.keys(ph)) {
     const entry = ph[key] || {};
     const files: File[] = entry.files || [];
+    const names: string[] = entry.names || [];
     for (const file of files) {
+      const idx = files.indexOf(file);
+      const nameFromList = names[idx];
       list.push({
         id: crypto.randomUUID(),
         report_id: reportId,
         field_key: key,
-        file_name: file.name || `${key}.jpg`,
+        file_name: nameFromList || file.name || `${key}.jpg`,
         blob: file,
         status,
         created_at: now,

@@ -129,6 +129,30 @@ function countSelected(entry: PhotoEntry | undefined) {
   return Math.max(files.length, urls.length, names.length);
 }
 
+function totalSelected(photos: Record<string, PhotoEntry>) {
+  let total = 0;
+  for (const key of Object.keys(photos || {})) {
+    total += countSelected(photos[key]);
+  }
+  return total;
+}
+
+function pad3(n: number) {
+  return String(n).padStart(3, "0");
+}
+
+function buildPhotoId(siteId: string | undefined, seq: number) {
+  const base = (siteId && String(siteId).trim()) ? String(siteId).trim() : "SITE";
+  return `${base}_foto_${pad3(seq)}`;
+}
+
+function renameWithId(file: File, photoId: string) {
+  const name = file.name || "foto.jpg";
+  const ext = name.includes(".") ? name.split(".").pop() : "jpg";
+  const newName = `${photoId}.${ext}`.replace(/\.+/g, ".");
+  return new File([file], newName, { type: file.type || "image/jpeg" });
+}
+
 function Preview({ fileOrUrl }: { fileOrUrl?: File | string }) {
   if (!fileOrUrl) return null;
   const src = typeof fileOrUrl === "string" ? fileOrUrl : URL.createObjectURL(fileOrUrl);
@@ -166,6 +190,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     if (typeof navigator === "undefined") return false;
     return !navigator.onLine;
   });
+  const siteId = (data as any)?.siteId;
 
   React.useEffect(() => {
     const onOnline = () => setIsOffline(false);
@@ -189,9 +214,16 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     const tooBig = files.find((f) => f.size > MAX);
     if (tooBig) { alert(`O arquivo "${tooBig.name}" excede 20MB e nÃ£o serÃ¡ aceito.`); return; }
     const processed: File[] = [];
-    for (const f of files) processed.push(await compressImage(f, 0.85));
+    const names: string[] = [];
+    let seq = totalSelected(photos) + 1;
+    for (const f of files) {
+      const compressed = await compressImage(f, 0.85);
+      const photoId = buildPhotoId(siteId, seq++);
+      const renamed = renameWithId(compressed, photoId);
+      processed.push(renamed);
+      names.push(renamed.name);
+    }
 
-    const names = processed.map((f, idx) => f.name || `foto_${idx + 1}.jpg`);
     setEntry(id, { files: processed, urls: [], names });
 
     if (minCount && processed.length < minCount) {
@@ -217,9 +249,11 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     }
 
     const processed = await compressImage(file, 0.85);
-    currentFiles[angleIndex] = processed;
+    const photoId = buildPhotoId(siteId, totalSelected(photos) + 1);
+    const renamed = renameWithId(processed, photoId);
+    currentFiles[angleIndex] = renamed;
     currentUrls[angleIndex] = undefined as any;
-    currentNames[angleIndex] = processed.name || `foto_${angleIndex + 1}.jpg`;
+    currentNames[angleIndex] = renamed.name;
     setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
   };
 
@@ -239,9 +273,11 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     }
 
     const processed = await compressImage(file, 0.85);
-    currentFiles[slotIndex] = processed;
+    const photoId = buildPhotoId(siteId, totalSelected(photos) + 1);
+    const renamed = renameWithId(processed, photoId);
+    currentFiles[slotIndex] = renamed;
     currentUrls[slotIndex] = undefined as any;
-    currentNames[slotIndex] = processed.name || `foto_${slotIndex + 1}.jpg`;
+    currentNames[slotIndex] = renamed.name;
     setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
   };
 
