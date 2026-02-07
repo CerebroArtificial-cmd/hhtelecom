@@ -218,6 +218,22 @@ export default function ReportForm() {
 
   }, [formData]);
 
+  useEffect(() => {
+
+    const ph = (formData as any)?.photosUploads;
+
+    if (!ph) return;
+
+    const t = setTimeout(() => {
+
+      void handleSaveDraft(true);
+
+    }, 300);
+
+    return () => clearTimeout(t);
+
+  }, [formData]);
+
 
 
   useEffect(() => {
