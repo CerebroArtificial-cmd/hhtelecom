@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
@@ -10,6 +10,7 @@ import type { ReportData } from "@/types/report";
 type PhotoEntry = {
   files?: File[];
   urls?: string[];
+  names?: string[];
   coordsText?: string;
   coords?: { lat: number; lng: number };
 };
@@ -27,43 +28,43 @@ const photoFields: Array<{
   minCount?: number;
   fixedSlots?: number;
 }> = [
-  { id: "ruaAcessoDireita", label: "RUA DE ACESSO AO IMÓVEL (direita)" },
-  { id: "ruaAcessoEsquerda", label: "RUA DE ACESSO AO IMÓVEL (esquerda)" },
-  { id: "calcadaDireita", label: "CALÇADA (direita)" },
-  { id: "calcadaEsquerda", label: "CALÇADA (esquerda)" },
-  { id: "frenteImovel1", label: "FRENTE DO IMÓVEL (1ª foto)" },
-  { id: "frenteImovel2", label: "FRENTE DO IMÓVEL (2ª foto)" },
-  { id: "vizinhoDireita", label: "VIZINHO DO IMÓVEL (direita)" },
-  { id: "vizinhoEsquerda", label: "VIZINHO DO IMÓVEL (esquerda)" },
+  { id: "ruaAcessoDireita", label: "RUA DE ACESSO AO IMÃ“VEL (direita)" },
+  { id: "ruaAcessoEsquerda", label: "RUA DE ACESSO AO IMÃ“VEL (esquerda)" },
+  { id: "calcadaDireita", label: "CALÃ‡ADA (direita)" },
+  { id: "calcadaEsquerda", label: "CALÃ‡ADA (esquerda)" },
+  { id: "frenteImovel1", label: "FRENTE DO IMÃ“VEL (1Âª foto)" },
+  { id: "frenteImovel2", label: "FRENTE DO IMÃ“VEL (2Âª foto)" },
+  { id: "vizinhoDireita", label: "VIZINHO DO IMÃ“VEL (direita)" },
+  { id: "vizinhoEsquerda", label: "VIZINHO DO IMÃ“VEL (esquerda)" },
 
-  { id: "posteFrente", label: "POSTE EM FRENTE AO IMÓVEL / Coordenadas GPS", requireCoords: true },
-  { id: "relogioProximo", label: "RELÓGIO MAIS PRÓXIMO / Coordenadas GPS (VERIFICAR TIPO DE ENERGIA)", requireCoords: true },
-  { id: "trafoProximo", label: "TRAFO MAIS PRÓXIMO / Coordenadas GPS", requireCoords: true },
+  { id: "posteFrente", label: "POSTE EM FRENTE AO IMÃ“VEL / Coordenadas GPS", requireCoords: true },
+  { id: "relogioProximo", label: "RELÃ“GIO MAIS PRÃ“XIMO / Coordenadas GPS (VERIFICAR TIPO DE ENERGIA)", requireCoords: true },
+  { id: "trafoProximo", label: "TRAFO MAIS PRÃ“XIMO / Coordenadas GPS", requireCoords: true },
 
-  { id: "redeRua1", label: "FOTO 1 DA REDE NA RUA DO IMÓVEL" },
-  { id: "redeRua2", label: "FOTO 2 DA REDE NA RUA DO IMÓVEL" },
+  { id: "redeRua1", label: "FOTO 1 DA REDE NA RUA DO IMÃ“VEL" },
+  { id: "redeRua2", label: "FOTO 2 DA REDE NA RUA DO IMÃ“VEL" },
   { id: "redePrincipal1", label: "FOTO 1 DA REDE NA RUA PRINCIPAL" },
   { id: "redePrincipal2", label: "FOTO 2 DA REDE NA RUA PRINCIPAL" },
 
-  { id: "siteLado1", label: "FOTO DO SITE (lado 1 - Frente para trás)" },
+  { id: "siteLado1", label: "FOTO DO SITE (lado 1 - Frente para trÃ¡s)" },
   { id: "siteLado2", label: "FOTO DO SITE (lado 2 - Direita para esquerda)" },
-  { id: "siteLado3", label: "FOTO DO SITE (lado 3 - Trás para frente)" },
+  { id: "siteLado3", label: "FOTO DO SITE (lado 3 - TrÃ¡s para frente)" },
   { id: "siteLado4", label: "FOTO DO SITE (lado 4 - Esquerda para direita)" },
   { id: "siteDiagonal1", label: "FOTO DO SITE (diagonal 1)" },
   { id: "siteDiagonal2", label: "FOTO DO SITE (diagonal 2)" },
 
-  { id: "visaoGeral", label: "VISÃO GERAL DA ÁREA LOCADA" },
-  { id: "cantos4", label: "FOTOS VOLTADAS PARA DENTRO DO TERRENO DOS 4 CANTOS DO IMÓVEL (quando possível)", fixedSlots: 4 },
-  { id: "construcoes", label: "FOTOS DE TODAS AS CONSTRUÇÕES, ÁRVORES E DETALHES NO IMÓVEL", fixedSlots: 4 },
-  { id: "acessoPortaria", label: "FOTOS DE TODO ACESSO DA PORTARIA OU ENTRADA ATÉ A ÁREA LOCADA (existente ou a construir e em caso de condomínio)", fixedSlots: 4 },
+  { id: "visaoGeral", label: "VISÃƒO GERAL DA ÃREA LOCADA" },
+  { id: "cantos4", label: "FOTOS VOLTADAS PARA DENTRO DO TERRENO DOS 4 CANTOS DO IMÃ“VEL (quando possÃ­vel)", fixedSlots: 4 },
+  { id: "construcoes", label: "FOTOS DE TODAS AS CONSTRUÃ‡Ã•ES, ÃRVORES E DETALHES NO IMÃ“VEL", fixedSlots: 4 },
+  { id: "acessoPortaria", label: "FOTOS DE TODO ACESSO DA PORTARIA OU ENTRADA ATÃ‰ A ÃREA LOCADA (existente ou a construir e em caso de condomÃ­nio)", fixedSlots: 4 },
 
   { id: "coordenadasGPS", label: "Coordenadas GPS do SITE", requireCoords: true },
 
-  { id: "fotos360meio", label: "12 FOTOS 360° (do meio da área locada, iniciando no Norte)", multiple: true, minCount: 12 },
-  { id: "panoramica", label: "PANORÂMICA (do mesmo local das de 360°, iniciando ao Norte)" },
-  { id: "fotos360frente", label: "12 FOTOS 360° (da frente do imóvel, iniciando no Norte)", multiple: true, minCount: 12 },
+  { id: "fotos360meio", label: "12 FOTOS 360Â° (do meio da Ã¡rea locada, iniciando no Norte)", multiple: true, minCount: 12 },
+  { id: "panoramica", label: "PANORÃ‚MICA (do mesmo local das de 360Â°, iniciando ao Norte)" },
+  { id: "fotos360frente", label: "12 FOTOS 360Â° (da frente do imÃ³vel, iniciando no Norte)", multiple: true, minCount: 12 },
 
-  { id: "contaConcessionariaFoto", label: "CONTA DE CONCESSIONÁRIA" },
+  { id: "contaConcessionariaFoto", label: "CONTA DE CONCESSIONÃRIA" },
 ];
 
 const ANGLES = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
@@ -115,12 +116,17 @@ function fileLabel(fileOrUrl?: File | string) {
   }
   return fileOrUrl.name || "arquivo";
 }
-
+function nameLabel(names?: string[], idx?: number) {
+  if (!names || names.length === 0) return "";
+  if (idx === undefined) return names[0] || "";
+  return names[idx] || "";
+}
 function countSelected(entry: PhotoEntry | undefined) {
   if (!entry) return 0;
   const files = entry.files?.filter(Boolean) || [];
   const urls = entry.urls?.filter(Boolean) || [];
-  return Math.max(files.length, urls.length);
+  const names = entry.names?.filter(Boolean) || [];
+  return Math.max(files.length, urls.length, names.length);
 }
 
 function renderCountBar(count: number, total: number) {
@@ -196,36 +202,40 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     const files = fileList ? Array.from(fileList) : [];
     const MAX = 20 * 1024 * 1024; // 20MB
     const tooBig = files.find((f) => f.size > MAX);
-    if (tooBig) { alert(`O arquivo "${tooBig.name}" excede 20MB e não será aceito.`); return; }
+    if (tooBig) { alert(`O arquivo "${tooBig.name}" excede 20MB e nÃ£o serÃ¡ aceito.`); return; }
     const processed: File[] = [];
     for (const f of files) processed.push(await compressImage(f, 0.85));
 
-    setEntry(id, { files: processed, urls: [] });
+    const names = processed.map((f, idx) => f.name || `foto_${idx + 1}.jpg`);
+    setEntry(id, { files: processed, urls: [], names });
 
     if (minCount && processed.length < minCount) {
       alert(`Selecione pelo menos ${minCount} foto(s) para "${id}".`);
     }
   };
 
-  // Handler específico para 360°: um input por ângulo
+  // Handler especÃ­fico para 360Â°: um input por Ã¢ngulo
   const onFileForAngle = async (id: string, angleIndex: number, fileList: FileList | null) => {
     const file = fileList && fileList[0] ? fileList[0] : undefined;
     const entry: PhotoEntry = photos[id] || {};
     const currentFiles: File[] = Array.from(entry.files || []);
     const currentUrls: string[] = Array.from(entry.urls || []);
+    const currentNames: string[] = Array.from(entry.names || []);
 
     if (!file) {
-      // limpar ângulo
+      // limpar Ã¢ngulo
       currentFiles[angleIndex] = undefined as any;
       currentUrls[angleIndex] = undefined as any;
-      setEntry(id, { files: currentFiles, urls: currentUrls });
+      currentNames[angleIndex] = undefined as any;
+      setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
       return;
     }
 
     const processed = await compressImage(file, 0.85);
     currentFiles[angleIndex] = processed;
     currentUrls[angleIndex] = undefined as any;
-    setEntry(id, { files: currentFiles, urls: currentUrls });
+    currentNames[angleIndex] = processed.name || `foto_${angleIndex + 1}.jpg`;
+    setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
   };
 
   const onFileForSlot = async (id: string, slotIndex: number, fileList: FileList | null) => {
@@ -233,23 +243,26 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     const entry: PhotoEntry = photos[id] || {};
     const currentFiles: File[] = Array.from(entry.files || []);
     const currentUrls: string[] = Array.from(entry.urls || []);
+    const currentNames: string[] = Array.from(entry.names || []);
 
     if (!file) {
       currentFiles[slotIndex] = undefined as any;
       currentUrls[slotIndex] = undefined as any;
-      setEntry(id, { files: currentFiles, urls: currentUrls });
+      currentNames[slotIndex] = undefined as any;
+      setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
       return;
     }
 
     const processed = await compressImage(file, 0.85);
     currentFiles[slotIndex] = processed;
     currentUrls[slotIndex] = undefined as any;
-    setEntry(id, { files: currentFiles, urls: currentUrls });
+    currentNames[slotIndex] = processed.name || `foto_${slotIndex + 1}.jpg`;
+    setEntry(id, { files: currentFiles, urls: currentUrls, names: currentNames });
   };
 
   const handleUseGPS = (id: string) => {
     if (!("geolocation" in navigator)) {
-      alert("Geolocalização não suportada neste dispositivo/navegador.");
+      alert("GeolocalizaÃ§Ã£o nÃ£o suportada neste dispositivo/navegador.");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -258,7 +271,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
         setEntry(id, { coordsText: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`, coords: { lat: latitude, lng: longitude } });
       },
       (err) => {
-        alert(`Não foi possível obter localização: ${err?.message || err}`);
+        alert(`NÃ£o foi possÃ­vel obter localizaÃ§Ã£o: ${err?.message || err}`);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
@@ -297,7 +310,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
           </Button>
         </div>
         <p className="text-sm text-gray-600">
-          <strong>OBS.:</strong> Sempre demarcar a área locada com <em>tira zebrada</em>.
+          <strong>OBS.:</strong> Sempre demarcar a Ã¡rea locada com <em>tira zebrada</em>.
         </p>
       </CardHeader>
 
@@ -317,19 +330,20 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                     {ANGLES.map((a, idx) => {
                       const file = entry.files && entry.files[idx];
                       const url = entry.urls && entry.urls[idx];
+                      const name = nameLabel(entry.names, idx);
                       const value = url || file;
                       return (
                         <div key={idx} className="border rounded p-2">
-                          <div className="text-xs text-gray-700 mb-1">Ângulo: {angleLabel(a)}</div>
+                          <div className="text-xs text-gray-700 mb-1">Ã‚ngulo: {angleLabel(a)}</div>
                           <input
                             type="file"
                             accept="image/png,image/jpeg"
                             onChange={(e) => onFileForAngle(item.id, idx, e.target.files)}
                             className="block w-full cursor-pointer rounded-md border border-gray-300 bg-white p-1 text-xs file:mr-2 file:rounded file:border-0 file:bg-[#77807a] file:hover:bg-[#5f6762] file:px-2 file:py-1 file:text-white"
                           />
-                          {value ? (
+                          {(name || value) ? (
                             <div className="mt-2 text-xs text-gray-700 break-all">
-                              {fileLabel(value)}
+                              {name || fileLabel(value)}
                             </div>
                           ) : null}
                           {!isOffline && <Preview fileOrUrl={value} />}
@@ -366,6 +380,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                     {Array.from({ length: item.fixedSlots }).map((_, idx) => {
                       const file = entry.files && entry.files[idx];
                       const url = entry.urls && entry.urls[idx];
+                      const name = nameLabel(entry.names, idx);
                       const value = url || file;
                       return (
                         <div key={idx} className="border rounded p-2">
@@ -376,9 +391,9 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                             onChange={(e) => onFileForSlot(item.id, idx, e.target.files)}
                             className="block w-full cursor-pointer rounded-md border border-gray-300 bg-white p-1 text-xs file:mr-2 file:rounded file:border-0 file:bg-[#77807a] file:hover:bg-[#5f6762] file:px-2 file:py-1 file:text-white"
                           />
-                          {value ? (
+                          {(name || value) ? (
                             <div className="mt-2 text-xs text-gray-700 break-all">
-                              {fileLabel(value)}
+                              {name || fileLabel(value)}
                             </div>
                           ) : null}
                           {!isOffline && <Preview fileOrUrl={value} />}
@@ -429,9 +444,9 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                 {(entry.files && entry.files.length > 0) || (entry.urls && entry.urls.length > 0) ? (
                   <>
                     <div className="mt-2 space-y-1">
-                      {(entry.urls && entry.urls.length > 0 ? entry.urls : entry.files || []).map((it: any, idx: number) => (
+                      {(entry.names && entry.names.length > 0 ? entry.names : (entry.urls && entry.urls.length > 0 ? entry.urls : entry.files || [])).map((it: any, idx: number) => (
                         <div key={idx} className="text-xs text-gray-700 break-all">
-                          {labels && labels[idx] ? `${labels[idx]} - ` : ""}{fileLabel(it)}
+                          {labels && labels[idx] ? `${labels[idx]} - ` : ""}{typeof it === "string" ? it : fileLabel(it)}
                         </div>
                       ))}
                     </div>
@@ -478,3 +493,4 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
     </Card>
   );
 }
+
