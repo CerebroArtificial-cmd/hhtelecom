@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const runtime = "nodejs";
@@ -10,7 +10,7 @@ const publicBaseUrl = process.env.AWS_PUBLIC_BASE_URL || "";
 
 function buildPublicUrl(key: string) {
   if (publicBaseUrl) {
-    return `${publicBaseUrl.replace(/\\/$/, "")}/${key}`;
+    return `${publicBaseUrl.replace(/\/$/, "")}/${key}`;
   }
   if (region === "us-east-1") {
     return `https://${bucket}.s3.amazonaws.com/${key}`;
@@ -51,3 +51,4 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ url: buildPublicUrl(key), key });
 }
+

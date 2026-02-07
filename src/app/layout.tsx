@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+ï»¿import type { Metadata } from "next";
 import "../styles/globals.css";
 import Image from "next/image";
 import { Toaster } from "@/components/ui/toast";
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        {/* Conteúdo principal */}
+        {/* ConteÃºdo principal */}
         <main className="flex-1 container mx-auto px-6 py-10">
           <AppToastProvider>
             {children}
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </AppToastProvider>
         </main>
 
-        {/* Rodapé */}
+        {/* RodapÃ© */}
         <footer className="bg-white border-t py-4 text-center text-sm text-gray-500">
           &copy; {new Date().getFullYear()} HH Telecom. Todos os direitos reservados.
         </footer>
@@ -49,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
 
 
 
