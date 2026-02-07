@@ -107,6 +107,15 @@ function angleLabel(a: number) {
   return `${a}\u00B0`;
 }
 
+function fileLabel(fileOrUrl?: File | string) {
+  if (!fileOrUrl) return "";
+  if (typeof fileOrUrl === "string") {
+    const parts = fileOrUrl.split("/");
+    return parts[parts.length - 1] || "arquivo";
+  }
+  return fileOrUrl.name || "arquivo";
+}
+
 function Preview({ fileOrUrl }: { fileOrUrl?: File | string }) {
   if (!fileOrUrl) return null;
   const src = typeof fileOrUrl === "string" ? fileOrUrl : URL.createObjectURL(fileOrUrl);
@@ -140,6 +149,21 @@ async function compressImage(file: File, quality = 0.85): Promise<File> {
 export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) {
   const photos = (data as any).photosUploads || {};
   const [photoView, setPhotoView] = React.useState<"gf" | "rt" | "360">("gf");
+  const [isOffline, setIsOffline] = React.useState<boolean>(() => {
+    if (typeof navigator === "undefined") return false;
+    return !navigator.onLine;
+  });
+
+  React.useEffect(() => {
+    const onOnline = () => setIsOffline(false);
+    const onOffline = () => setIsOffline(true);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
 
   const setEntry = (id: string, partial: Partial<PhotoEntry>) => {
     const next = { ...photos, [id]: { ...(photos[id] || {}), ...partial } };
@@ -278,7 +302,15 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                             onChange={(e) => onFileForAngle(item.id, idx, e.target.files)}
                             className="block w-full cursor-pointer rounded-md border border-gray-300 bg-white p-1 text-xs file:mr-2 file:rounded file:border-0 file:bg-[#77807a] file:hover:bg-[#5f6762] file:px-2 file:py-1 file:text-white"
                           />
-                          <Preview fileOrUrl={value} />
+                          {isOffline ? (
+                            value ? (
+                              <div className="mt-2 text-xs text-gray-700 break-all">
+                                {fileLabel(value)}
+                              </div>
+                            ) : null
+                          ) : (
+                            <Preview fileOrUrl={value} />
+                          )}
                         </div>
                       );
                     })}
@@ -321,7 +353,15 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                             onChange={(e) => onFileForSlot(item.id, idx, e.target.files)}
                             className="block w-full cursor-pointer rounded-md border border-gray-300 bg-white p-1 text-xs file:mr-2 file:rounded file:border-0 file:bg-[#77807a] file:hover:bg-[#5f6762] file:px-2 file:py-1 file:text-white"
                           />
-                          <Preview fileOrUrl={value} />
+                          {isOffline ? (
+                            value ? (
+                              <div className="mt-2 text-xs text-gray-700 break-all">
+                                {fileLabel(value)}
+                              </div>
+                            ) : null
+                          ) : (
+                            <Preview fileOrUrl={value} />
+                          )}
                         </div>
                       );
                     })}
@@ -365,21 +405,31 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                 />
 
                 {(entry.files && entry.files.length > 0) || (entry.urls && entry.urls.length > 0) ? (
-                  <div className="mt-2 grid grid-cols-3 md:grid-cols-4 gap-2">
-                    {(entry.urls && entry.urls.length > 0 ? entry.urls : entry.files || []).map((it: any, idx: number) => (
-                      <div key={idx} className="relative w-24 h-24 overflow-hidden rounded-md border bg-gray-50">
-                        <img
-                          src={typeof it === "string" ? it : URL.createObjectURL(it)}
-                          alt={typeof it === "string" ? "foto" : it.name}
-                          className="w-full h-full object-cover"
-                          onLoad={(e) => { if (typeof it !== "string") URL.revokeObjectURL((e.target as HTMLImageElement).src); }}
-                        />
-                        {labels && labels[idx] && (
-                          <span className="absolute top-1 left-1 bg-black/70 text-white text-[10px] px-1 rounded">{labels[idx]}</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  isOffline ? (
+                    <div className="mt-2 space-y-1">
+                      {(entry.urls && entry.urls.length > 0 ? entry.urls : entry.files || []).map((it: any, idx: number) => (
+                        <div key={idx} className="text-xs text-gray-700 break-all">
+                          {labels && labels[idx] ? `${labels[idx]} - ` : ""}{fileLabel(it)}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-2 grid grid-cols-3 md:grid-cols-4 gap-2">
+                      {(entry.urls && entry.urls.length > 0 ? entry.urls : entry.files || []).map((it: any, idx: number) => (
+                        <div key={idx} className="relative w-24 h-24 overflow-hidden rounded-md border bg-gray-50">
+                          <img
+                            src={typeof it === "string" ? it : URL.createObjectURL(it)}
+                            alt={typeof it === "string" ? "foto" : it.name}
+                            className="w-full h-full object-cover"
+                            onLoad={(e) => { if (typeof it !== "string") URL.revokeObjectURL((e.target as HTMLImageElement).src); }}
+                          />
+                          {labels && labels[idx] && (
+                            <span className="absolute top-1 left-1 bg-black/70 text-white text-[10px] px-1 rounded">{labels[idx]}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )
                 ) : null}
 
                 {item.requireCoords && (

@@ -3,17 +3,22 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app import models, schemas, crud
+from app.auth import get_current_user
 
 router = APIRouter(prefix="/rascunhos", tags=["rascunhos"])
 
 
 @router.post("", response_model=schemas.RelatorioOut)
-def create_rascunho(payload: dict, db: Session = Depends(get_db)):
+def create_rascunho(
+    payload: dict,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
     if not payload:
         raise HTTPException(status_code=400, detail="Payload vazio")
     payload = dict(payload)
     payload["status"] = "draft"
-    relatorio = crud.create_relatorio(db, payload, save_photos=False, status_override="draft")
+    relatorio = crud.create_relatorio(db, payload, save_photos=False, status_override="draft", user_id=user.id)
     return _to_relatorio_out(relatorio)
 
 
@@ -23,8 +28,13 @@ def update_rascunho(
     payload: dict,
     replace_photos: bool = Query(default=True),
     db: Session = Depends(get_db),
+    user=Depends(get_current_user),
 ):
-    relatorio = db.query(models.Relatorio).filter(models.Relatorio.id == relatorio_id).first()
+    relatorio = (
+        db.query(models.Relatorio)
+        .filter(models.Relatorio.id == relatorio_id, models.Relatorio.user_id == user.id)
+        .first()
+    )
     if not relatorio:
         raise HTTPException(status_code=404, detail="Relatorio nao encontrado")
     payload = dict(payload)
@@ -44,8 +54,9 @@ def update_rascunho(
 def get_ultimo_rascunho(
     site_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
+    user=Depends(get_current_user),
 ):
-    q = db.query(models.Relatorio).filter(models.Relatorio.status == "draft")
+    q = db.query(models.Relatorio).filter(models.Relatorio.status == "draft", models.Relatorio.user_id == user.id)
     if site_id:
         q = q.filter(models.Relatorio.site_id == site_id)
     relatorio = q.order_by(models.Relatorio.updated_at.desc()).first()

@@ -6,8 +6,8 @@ from app.config import settings
 from app.routers.relatorios import router as relatorios_router
 from app.routers.rascunhos import router as rascunhos_router
 from app.routers.uploads import router as uploads_router
-from dotenv import load_dotenv
-load_dotenv()
+from app.routers.config import router as config_router
+from app.routers.auth import router as auth_router
 
 
 app = FastAPI(title="Relatorio de Visita Externa API")
@@ -15,12 +15,12 @@ app = FastAPI(title="Relatorio de Visita Externa API")
 origins = settings.cors_origins
 if origins:
     app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 if settings.storage_backend == "local":
     app.mount("/storage", StaticFiles(directory=settings.storage_dir), name="storage")
@@ -28,3 +28,5 @@ if settings.storage_backend == "local":
 app.include_router(relatorios_router, prefix="/api")
 app.include_router(rascunhos_router, prefix="/api")
 app.include_router(uploads_router, prefix="/api")
+app.include_router(config_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")

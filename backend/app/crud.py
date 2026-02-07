@@ -26,11 +26,13 @@ def create_relatorio(
     payload: Dict[str, Any],
     save_photos: bool = True,
     status_override: str | None = None,
+    user_id: str | None = None,
 ) -> models.Relatorio:
     photos = _extract_photos(payload)
     cleaned = _strip_photos(payload)
     relatorio = models.Relatorio(
         id=str(uuid.uuid4()),
+        user_id=user_id,
         timestamp_iso=payload.get("timestamp_iso"),
         site_id=payload.get("siteId"),
         operadora=payload.get("operadora"),

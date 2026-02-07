@@ -1,7 +1,7 @@
 Relatorio de Visita Externa - TODO
 
 Geral
-- [ ] Padronizar rotulos PT-BR (acentos/termos CTM)
+- [ ] Padronizar rotulos PT-BR (acentos/termos HH Telecom)
 - [ ] Validar obrigatorios por aba (minimos de fotos, campos chave)
 - [ ] Indicadores de progresso por aba e erros em destaque
 - [ ] Melhorar mascaras de entrada (telefone, CEP, moeda)
@@ -25,3 +25,4 @@ Documentacao
 - [x] README atualizado
 - [ ] Guia de troubleshooting (CORS)
 - [ ] Checklist de publicacao
+

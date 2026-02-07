@@ -1,6 +1,6 @@
 # Backend - Relatorio de Visita Externa
 
-Backend FastAPI com MySQL e armazenamento de fotos em arquivo (storage local).
+Backend FastAPI com SQLite e armazenamento de fotos em arquivo (storage local).
 
 ## Requisitos
 - Python 3.11+
@@ -16,6 +16,9 @@ Backend FastAPI com MySQL e armazenamento de fotos em arquivo (storage local).
    python -m app.init_db
 6) Rode:
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+Opcional (rodando da raiz do projeto):
+   uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## Variaveis
 - DATABASE_URL: string de conexao MySQL

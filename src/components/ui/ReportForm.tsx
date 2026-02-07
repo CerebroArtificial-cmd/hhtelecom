@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +10,14 @@ import Infrastructure from './Infrastructure';
 import Security from './Security';
 import PhotoChecklist from './PhotoChecklist';
 import RulesSection from './RulesSection';
+import {
+  upsertReport,
+  upsertPhotos,
+  deletePhotosByReport,
+  OfflinePhoto,
+  OfflineReport,
+} from '@/lib/offlineStore';
+import { syncPending } from '@/lib/sync';
 
 async function fileToDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -20,21 +28,64 @@ async function fileToDataURL(file: File): Promise<string> {
   });
 }
 
-export default function ReportForm() {
-  const API_BASE = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+function buildPhotoMeta(data: ReportData) {
+  const ph = (data as any).photosUploads || {};
+  const out: Record<string, any> = {};
+  for (const key of Object.keys(ph)) {
+    const entry = ph[key] || {};
+    const files: File[] = entry.files || [];
+    const urls: string[] = entry.urls || [];
+    out[key] = {
+      file_names: files.map((f) => f.name || `${key}.jpg`),
+      urls,
+      coords: entry.coords || null,
+    };
+  }
+  return out;
+}
 
+function buildPayloadForSync(data: ReportData) {
+  const copy: any = { ...(data || {}) };
+  copy.photosUploads = buildPhotoMeta(data);
+  return copy;
+}
+
+function makeOfflinePhotos(reportId: string, data: ReportData, status: "draft" | "pending") {
+  const now = new Date().toISOString();
+  const ph = (data as any).photosUploads || {};
+  const list: OfflinePhoto[] = [];
+  for (const key of Object.keys(ph)) {
+    const entry = ph[key] || {};
+    const files: File[] = entry.files || [];
+    for (const file of files) {
+      list.push({
+        id: crypto.randomUUID(),
+        report_id: reportId,
+        field_key: key,
+        file_name: file.name || `${key}.jpg`,
+        blob: file,
+        status,
+        created_at: now,
+        coords: entry.coords || null,
+      });
+    }
+  }
+  return list;
+}
+
+export default function ReportForm() {
   const [formData, setFormData] = useState<ReportData>({});
   const [activeTab, setActiveTab] = useState('inicio');
   const [exporting, setExporting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(null);
+  const [lastAutoSaveAt, setLastAutoSaveAt] = useState<Date | null>(null);
   const formDataRef = useRef(formData);
   const draftIdRef = useRef(draftId);
   const savingDraftRef = useRef(false);
-  const [loadingDraft, setLoadingDraft] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadTotal, setUploadTotal] = useState(0);
-  const [uploadDone, setUploadDone] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+  const [syncTotal, setSyncTotal] = useState(0);
+  const [syncDone, setSyncDone] = useState(0);
 
   useEffect(() => {
     formDataRef.current = formData;
@@ -106,68 +157,30 @@ export default function ReportForm() {
     setExporting(false);
   };
 
-  const uploadFileToStorage = async (file: File): Promise<string> => {
-    if (!API_BASE) {
-      throw new Error('Backend nao configurado.');
-    }
-    const siteId = (formDataRef.current as any)?.siteId;
-    const presignRes = await fetch(`${API_BASE}/api/uploads/presign`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: file.name,
-        content_type: file.type || "application/octet-stream",
-        site_id: siteId,
-        draft_id: draftIdRef.current,
-      }),
-    });
-    if (!presignRes.ok) {
-      const text = await presignRes.text();
-      throw new Error(text || "Falha ao gerar URL de upload.");
-    }
-    const presign = await presignRes.json();
-    const uploadRes = await fetch(presign.upload_url, {
-      method: "PUT",
-      headers: { "Content-Type": file.type || "application/octet-stream" },
-      body: file,
-    });
-    if (!uploadRes.ok) {
-      throw new Error("Falha ao enviar a foto para o storage.");
-    }
-    return presign.public_url;
-  };
-
   const handleSaveDraft = async (silent = false) => {
-    if (!API_BASE) {
-      if (!silent) toast.error('Backend nao configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
-      return;
-    }
     const currentData = formDataRef.current;
-    if (!currentData || Object.keys(currentData).length === 0) {
-      return;
-    }
-    if (savingDraftRef.current) {
-      return;
-    }
+    if (!currentData || Object.keys(currentData).length === 0) return;
+    if (savingDraftRef.current) return;
     savingDraftRef.current = true;
     if (!silent) setSavingDraft(true);
     try {
-      const payload = await serializeForExport(currentData, { includeFileData: false });
-      const currentDraftId = draftIdRef.current;
-      const res = await fetch(`${API_BASE}/api/rascunhos${currentDraftId ? `/${currentDraftId}` : ''}`, {
-        method: currentDraftId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, status: 'draft', timestamp_iso: new Date().toISOString() }),
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        console.error('Draft error:', res.status, text);
-        if (!silent) toast.error('Falha ao salvar rascunho.');
-        return;
-      }
-      const data = await res.json();
-      if (data?.id) setDraftId(data.id);
-      if (!silent) toast.success('Rascunho salvo no servidor.');
+      const now = new Date().toISOString();
+      const currentDraftId = draftIdRef.current || crypto.randomUUID();
+      const payload = buildPayloadForSync(currentData);
+      const report: OfflineReport = {
+        id: currentDraftId,
+        payload_json: JSON.stringify(payload),
+        status: "draft",
+        created_at: now,
+        updated_at: now,
+      };
+      await upsertReport(report);
+      await deletePhotosByReport(currentDraftId);
+      const photos = makeOfflinePhotos(currentDraftId, currentData, "draft");
+      if (photos.length > 0) await upsertPhotos(photos);
+      if (!draftIdRef.current) setDraftId(currentDraftId);
+      if (!silent) toast.success('Rascunho salvo no dispositivo.');
+      setLastAutoSaveAt(new Date());
     } catch (err) {
       console.error(err);
       if (!silent) toast.error('Erro ao salvar rascunho.');
@@ -177,107 +190,72 @@ export default function ReportForm() {
     }
   };
 
-  const handleLoadDraft = async () => {
-    if (!API_BASE) {
-      toast.error('Backend nao configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
-      return;
-    }
-    setLoadingDraft(true);
-    try {
-      const siteId = (formData as any)?.siteId;
-      const url = siteId
-        ? `${API_BASE}/api/rascunhos/ultimo?site_id=${encodeURIComponent(siteId)}`
-        : `${API_BASE}/api/rascunhos/ultimo`;
-      const res = await fetch(url);
-      if (!res.ok) {
-        const text = await res.text();
-        console.error('Draft load error:', res.status, text);
-        toast.error('Rascunho nao encontrado.');
-        return;
-      }
-      const data = await res.json();
-      const payload = data?.payload || {};
-      setFormData(payload);
-      if (data?.id) setDraftId(data.id);
-      setActiveTab('inicio');
-      toast.success('Rascunho carregado.');
-    } catch (err) {
-      console.error(err);
-      toast.error('Erro ao carregar rascunho.');
-    } finally {
-      setLoadingDraft(false);
-    }
-  };
-
   useEffect(() => {
     const id = setInterval(() => {
       void handleSaveDraft(true);
     }, 10000);
     return () => clearInterval(id);
-  }, [API_BASE]);
+  }, []);
+
+  const runSync = useCallback(async () => {
+    try {
+      setSyncing(true);
+      setSyncDone(0);
+      const res = await syncPending({
+        onProgress: (done, total) => {
+          setSyncTotal(total);
+          setSyncDone(done);
+        },
+      });
+      if (res && res.photos > 0) {
+        toast.success('Sincronizacao concluida.');
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Falha na sincronizacao.');
+    } finally {
+      setSyncing(false);
+      setSyncTotal(0);
+      setSyncDone(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onOnline = () => void runSync();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [runSync]);
 
   const handleSubmit = async () => {
-    if (!API_BASE) {
-      toast.error('Backend não configurado. Defina NEXT_PUBLIC_BACKEND_URL.');
-      return;
-    }
     const siteId = (formData as any)?.siteId;
     if (!siteId || String(siteId).trim() === "") {
       toast.error('Informe o siteId antes de enviar.');
       return;
     }
-    const photosPayload = (formData as any).photosUploads || {};
-    const totalUploads = Object.values(photosPayload).reduce((sum: number, entry: any) => {
-      const urls: string[] = entry?.urls || [];
-      const files: File[] = entry?.files || [];
-      if (urls.length > 0) return sum;
-      return sum + files.length;
-    }, 0);
-    setUploading(true);
-    setUploadTotal(totalUploads);
-    setUploadDone(0);
     try {
-      const photos: any = {};
-      const ph = (formData as any).photosUploads || {};
-      for (const key of Object.keys(ph)) {
-        const entry = ph[key] || {};
-        const urls: string[] = (entry as any).urls || [];
-        const files: File[] = (entry as any).files || [];
-        let images: string[] = [];
-        if (urls.length > 0) {
-          images = [...urls];
-        } else if (files.length > 0) {
-          const uploaded = await Promise.all(
-            files.map(async (f) => {
-              const url = await uploadFileToStorage(f);
-              setUploadDone((prev) => prev + 1);
-              return url;
-            })
-          );
-          images = uploaded;
-        }
-        photos[key] = { images, coords: entry.coords };
-      }
+      const now = new Date().toISOString();
+      const reportId = draftIdRef.current || crypto.randomUUID();
+      const payload = buildPayloadForSync(formData);
+      const report: OfflineReport = {
+        id: reportId,
+        payload_json: JSON.stringify(payload),
+        status: "pending",
+        created_at: now,
+        updated_at: now,
+      };
+      await upsertReport(report);
+      await deletePhotosByReport(reportId);
+      const photos = makeOfflinePhotos(reportId, formData, "pending");
+      if (photos.length > 0) await upsertPhotos(photos);
+      if (!draftIdRef.current) setDraftId(reportId);
+      toast.success('Relatorio salvo offline. Sincronizando quando houver internet.');
 
-      const res = await fetch(`${API_BASE}/api/relatorios`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, photosUploads: photos, timestamp_iso: new Date().toISOString() }),
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        toast.error('Falha ao enviar Relatório');
-        console.error('Backend error:', res.status, text);
-        return;
+      if (navigator.onLine) {
+        await runSync();
       }
-      toast.success('Relatório enviado com sucesso!');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao enviar. Verifique sua conexão.');
-    } finally {
-      setUploading(false);
-      setUploadTotal(0);
-      setUploadDone(0);
+      toast.error('Erro ao salvar offline.');
     }
   };
 
@@ -467,22 +445,22 @@ export default function ReportForm() {
   const order = ["inicio", "documentation", "infrastructure", "security", "photos", "rules"] as const;
   const pct = getCompletionPercentage();
   const idx = order.indexOf(activeTab as any);
-  const uploadPct = uploadTotal > 0 ? Math.round((uploadDone / uploadTotal) * 100) : 0;
+  const syncPct = syncTotal > 0 ? Math.round((syncDone / syncTotal) * 100) : 0;
   const handleTabChange = (value: string) => {
-    if (uploading) return;
+    if (syncing) return;
     setActiveTab(value);
   };
 
   return (
     <div className="safe-top safe-bottom">
       <div className="mx-auto w-full max-w-[var(--app-max)] px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        {uploading && (
+        {syncing && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="rounded-lg bg-white px-5 py-4 shadow-lg">
               <div className="flex items-center gap-3">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
                 <div className="text-sm text-gray-800">
-                  Enviando... {uploadTotal > 0 ? `${uploadDone}/${uploadTotal}` : ""}
+                  Sincronizando... {syncTotal > 0 ? `${syncDone}/${syncTotal}` : ""}
                 </div>
               </div>
             </div>
@@ -496,6 +474,11 @@ export default function ReportForm() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Progresso: {pct}% completo
                 </p>
+                {lastAutoSaveAt && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Rascunho salvo automaticamente as {lastAutoSaveAt.toLocaleTimeString()}
+                  </p>
+                )}
               </div>
 
               <div className="hidden sm:flex gap-2 sm:gap-3 sm:justify-end">
@@ -505,18 +488,8 @@ export default function ReportForm() {
 
                 <Button
                   type="button"
-                  variant="outline"
-                  onClick={handleLoadDraft}
-                  disabled={loadingDraft || uploading}
-                  className="h-9"
-                >
-                  {loadingDraft ? "Carregando..." : "Carregar rascunho"}
-                </Button>
-
-                <Button
-                  type="button"
                   onClick={handleSaveDraft}
-                  disabled={savingDraft || uploading}
+                  disabled={savingDraft || syncing}
                   className="h-9 bg-[#6b7280] hover:bg-[#4b5563] text-white"
                 >
                   {savingDraft ? "Salvando..." : "Salvar rascunho"}
@@ -524,8 +497,17 @@ export default function ReportForm() {
 
                 <Button
                   type="button"
+                  onClick={runSync}
+                  disabled={syncing}
+                  className="h-9 bg-[#1d4ed8] hover:bg-[#1e40af] text-white"
+                >
+                  {syncing ? "Sincronizando..." : "Sincronizar agora"}
+                </Button>
+
+                <Button
+                  type="button"
                   onClick={handleExport}
-                  disabled={exporting || uploading}
+                  disabled={exporting || syncing}
                   className="h-9 bg-[#0f766e] hover:bg-[#0c5f59] text-white"
                 >
                   {exporting ? "Exportando..." : "Exportar"}
@@ -539,42 +521,31 @@ export default function ReportForm() {
                 style={{ width: `${pct}%`, backgroundColor: "#77807a" }}
               />
             </div>
-            {uploading && uploadTotal > 0 && (
+            {syncing && syncTotal > 0 && (
               <div className="mt-2">
                 <div className="h-2 w-full bg-amber-100 rounded">
                   <div
                     className="h-full rounded bg-amber-500 transition-[width] duration-200"
-                    style={{ width: `${uploadPct}%` }}
+                    style={{ width: `${syncPct}%` }}
                   />
                 </div>
                 <p className="mt-1 text-xs text-amber-700">
-                  Enviando fotos: {uploadDone}/{uploadTotal}
+                  Enviando fotos: {syncDone}/{syncTotal}
                 </p>
               </div>
             )}
-            <div className="mt-2 flex justify-end sm:hidden">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleLoadDraft}
-                disabled={loadingDraft || uploading}
-                className="h-8 px-3 text-xs"
-              >
-                {loadingDraft ? "Carregando..." : "Carregar rascunho"}
-              </Button>
-            </div>
           </CardHeader>
 
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange}>
               <div className="w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible">
                 <TabsList className="flex w-max gap-0 sm:w-full sm:gap-0">
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informações</TabsTrigger>
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentação</TabsTrigger>
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Segurança</TabsTrigger>
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
-                  <TabsTrigger disabled={uploading} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observações</TabsTrigger>
+                  <TabsTrigger disabled={syncing} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="inicio">Informações</TabsTrigger>
+                  <TabsTrigger disabled={syncing} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="documentation">Documentação</TabsTrigger>
+                  <TabsTrigger disabled={syncing} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="infrastructure">Infraestrutura</TabsTrigger>
+                  <TabsTrigger disabled={syncing} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="security">Segurança</TabsTrigger>
+                  <TabsTrigger disabled={syncing} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="photos">Fotos</TabsTrigger>
+                  <TabsTrigger disabled={syncing} className="whitespace-nowrap min-w-[120px] sm:min-w-0 sm:flex-1 sm:justify-center" value="rules">Observações</TabsTrigger>
                 </TabsList>
               </div>
 
@@ -613,7 +584,7 @@ export default function ReportForm() {
                   <Button
                     variant="outline"
                     className="w-full sm:w-auto"
-                    disabled={uploading}
+                    disabled={syncing}
                     onClick={() => {
                       const i = order.indexOf(activeTab as any);
                       if (i > 0) setActiveTab(order[i - 1]);
@@ -625,9 +596,9 @@ export default function ReportForm() {
                   <Button
                     className="bg-[#D9452F] hover:bg-[#bf3a29] text-white w-full sm:w-auto"
                     onClick={handleSubmit}
-                    disabled={uploading}
+                    disabled={syncing}
                   >
-                    {uploading ? "Enviando..." : "Enviar"}
+                    {syncing ? "Enviando..." : "Enviar"}
                   </Button>
                 </div>
               </div>
@@ -636,10 +607,10 @@ export default function ReportForm() {
                 <p className="text-sm text-muted-foreground">
                   Preencha os campos e avance; o envio ocorre no final.
                 </p>
-                {uploading && (
+                {syncing && (
                   <p className="text-xs text-amber-700">
                     Upload em andamento. Aguarde a conclusão.
-                    {uploadTotal > 0 ? ` (${uploadDone}/${uploadTotal})` : ""}
+                    {syncTotal > 0 ? ` (${syncDone}/${syncTotal})` : ""}
                   </p>
                 )}
                 <div className="flex flex-wrap gap-2 justify-end">
@@ -647,7 +618,7 @@ export default function ReportForm() {
                     <Button
                       variant="outline"
                       className="w-full sm:w-auto"
-                      disabled={uploading}
+                      disabled={syncing}
                       onClick={() => {
                         const i = order.indexOf(activeTab as any);
                         if (i > 0) setActiveTab(order[i - 1]);
@@ -663,7 +634,7 @@ export default function ReportForm() {
                       const i = order.indexOf(activeTab as any);
                       if (i < order.length - 1) setActiveTab(order[i + 1]);
                     }}
-                    disabled={uploading || order.indexOf(activeTab as any) >= order.length - 1}
+                    disabled={syncing || order.indexOf(activeTab as any) >= order.length - 1}
                   >
                     Próximo
                   </Button>
@@ -677,22 +648,30 @@ export default function ReportForm() {
         <div className="sm:hidden">
           <div className="fixed left-0 right-0 bottom-0 safe-bottom bg-background/95 backdrop-blur border-t">
             <div className="mx-auto max-w-[var(--app-max)] px-3 py-3 flex gap-2">
-              <Button variant="outline" className="h-11 w-1/3" onClick={handleClear} disabled={uploading}>
+              <Button variant="outline" className="h-11 w-1/4" onClick={handleClear} disabled={syncing}>
                 Limpar
               </Button>
 
               <Button
-                className="h-11 w-1/3 bg-[#6b7280] hover:bg-[#4b5563] text-white"
+                className="h-11 w-1/4 bg-[#6b7280] hover:bg-[#4b5563] text-white"
                 onClick={handleSaveDraft}
-                disabled={savingDraft || uploading}
+                disabled={savingDraft || syncing}
               >
                 {savingDraft ? "Salvando..." : "Rascunho"}
               </Button>
 
               <Button
-                className="h-11 w-1/3 bg-[#0f766e] hover:bg-[#0c5f59] text-white"
+                className="h-11 w-1/4 bg-[#1d4ed8] hover:bg-[#1e40af] text-white"
+                onClick={runSync}
+                disabled={syncing}
+              >
+                {syncing ? "Sync..." : "Sync"}
+              </Button>
+
+              <Button
+                className="h-11 w-1/4 bg-[#0f766e] hover:bg-[#0c5f59] text-white"
                 onClick={handleExport}
-                disabled={exporting || uploading}
+                disabled={exporting || syncing}
               >
                 {exporting ? "Exportando..." : "Exportar"}
               </Button>
