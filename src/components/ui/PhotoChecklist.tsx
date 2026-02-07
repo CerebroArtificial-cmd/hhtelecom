@@ -116,6 +116,28 @@ function fileLabel(fileOrUrl?: File | string) {
   return fileOrUrl.name || "arquivo";
 }
 
+function countSelected(entry: PhotoEntry | undefined) {
+  if (!entry) return 0;
+  const files = entry.files?.filter(Boolean) || [];
+  const urls = entry.urls?.filter(Boolean) || [];
+  return Math.max(files.length, urls.length);
+}
+
+function renderCountBar(count: number, total: number) {
+  const pct = total > 0 ? Math.min(100, Math.round((count / total) * 100)) : 0;
+  return (
+    <div className="mt-2">
+      <div className="flex items-center justify-between text-xs text-gray-600">
+        <span>Fotos: {count}/{total}</span>
+        <span>{pct}%</span>
+      </div>
+      <div className="mt-1 h-2 w-full rounded bg-gray-200">
+        <div className="h-full rounded bg-[#a4373b]" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
 function Preview({ fileOrUrl }: { fileOrUrl?: File | string }) {
   if (!fileOrUrl) return null;
   const src = typeof fileOrUrl === "string" ? fileOrUrl : URL.createObjectURL(fileOrUrl);
@@ -283,11 +305,14 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {visibleFields.map((item) => {
             const entry: PhotoEntry = photos[item.id] || {};
+            const selectedCount = countSelected(entry);
+            const totalTarget = item.fixedSlots ? item.fixedSlots : item.minCount ? item.minCount : 1;
 
             if (IS_360.has(item.id)) {
               return (
                 <div key={item.id} className="rounded-lg border bg-white p-4 shadow-sm">
                   <Label className="block font-medium text-gray-800">{item.label}</Label>
+                  {renderCountBar(selectedCount, 12)}
                   <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {ANGLES.map((a, idx) => {
                       const file = entry.files && entry.files[idx];
@@ -302,15 +327,12 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                             onChange={(e) => onFileForAngle(item.id, idx, e.target.files)}
                             className="block w-full cursor-pointer rounded-md border border-gray-300 bg-white p-1 text-xs file:mr-2 file:rounded file:border-0 file:bg-[#77807a] file:hover:bg-[#5f6762] file:px-2 file:py-1 file:text-white"
                           />
-                          {isOffline ? (
-                            value ? (
-                              <div className="mt-2 text-xs text-gray-700 break-all">
-                                {fileLabel(value)}
-                              </div>
-                            ) : null
-                          ) : (
-                            <Preview fileOrUrl={value} />
-                          )}
+                          {value ? (
+                            <div className="mt-2 text-xs text-gray-700 break-all">
+                              {fileLabel(value)}
+                            </div>
+                          ) : null}
+                          {!isOffline && <Preview fileOrUrl={value} />}
                         </div>
                       );
                     })}
@@ -339,6 +361,7 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
               return (
                 <div key={item.id} className="rounded-lg border bg-white p-4 shadow-sm">
                   <Label className="block font-medium text-gray-800">{item.label}</Label>
+                  {renderCountBar(selectedCount, item.fixedSlots)}
                   <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {Array.from({ length: item.fixedSlots }).map((_, idx) => {
                       const file = entry.files && entry.files[idx];
@@ -353,15 +376,12 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                             onChange={(e) => onFileForSlot(item.id, idx, e.target.files)}
                             className="block w-full cursor-pointer rounded-md border border-gray-300 bg-white p-1 text-xs file:mr-2 file:rounded file:border-0 file:bg-[#77807a] file:hover:bg-[#5f6762] file:px-2 file:py-1 file:text-white"
                           />
-                          {isOffline ? (
-                            value ? (
-                              <div className="mt-2 text-xs text-gray-700 break-all">
-                                {fileLabel(value)}
-                              </div>
-                            ) : null
-                          ) : (
-                            <Preview fileOrUrl={value} />
-                          )}
+                          {value ? (
+                            <div className="mt-2 text-xs text-gray-700 break-all">
+                              {fileLabel(value)}
+                            </div>
+                          ) : null}
+                          {!isOffline && <Preview fileOrUrl={value} />}
                         </div>
                       );
                     })}
@@ -404,8 +424,10 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                   onChange={(e) => onFiles(item.id, e.target.files, item.minCount)}
                 />
 
+                {renderCountBar(selectedCount, totalTarget)}
+
                 {(entry.files && entry.files.length > 0) || (entry.urls && entry.urls.length > 0) ? (
-                  isOffline ? (
+                  <>
                     <div className="mt-2 space-y-1">
                       {(entry.urls && entry.urls.length > 0 ? entry.urls : entry.files || []).map((it: any, idx: number) => (
                         <div key={idx} className="text-xs text-gray-700 break-all">
@@ -413,23 +435,24 @@ export default function PhotoChecklist({ data, onChange }: PhotoChecklistProps) 
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="mt-2 grid grid-cols-3 md:grid-cols-4 gap-2">
-                      {(entry.urls && entry.urls.length > 0 ? entry.urls : entry.files || []).map((it: any, idx: number) => (
-                        <div key={idx} className="relative w-24 h-24 overflow-hidden rounded-md border bg-gray-50">
-                          <img
-                            src={typeof it === "string" ? it : URL.createObjectURL(it)}
-                            alt={typeof it === "string" ? "foto" : it.name}
-                            className="w-full h-full object-cover"
-                            onLoad={(e) => { if (typeof it !== "string") URL.revokeObjectURL((e.target as HTMLImageElement).src); }}
-                          />
-                          {labels && labels[idx] && (
-                            <span className="absolute top-1 left-1 bg-black/70 text-white text-[10px] px-1 rounded">{labels[idx]}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )
+                    {!isOffline && (
+                      <div className="mt-2 grid grid-cols-3 md:grid-cols-4 gap-2">
+                        {(entry.urls && entry.urls.length > 0 ? entry.urls : entry.files || []).map((it: any, idx: number) => (
+                          <div key={idx} className="relative w-24 h-24 overflow-hidden rounded-md border bg-gray-50">
+                            <img
+                              src={typeof it === "string" ? it : URL.createObjectURL(it)}
+                              alt={typeof it === "string" ? "foto" : it.name}
+                              className="w-full h-full object-cover"
+                              onLoad={(e) => { if (typeof it !== "string") URL.revokeObjectURL((e.target as HTMLImageElement).src); }}
+                            />
+                            {labels && labels[idx] && (
+                              <span className="absolute top-1 left-1 bg-black/70 text-white text-[10px] px-1 rounded">{labels[idx]}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 ) : null}
 
                 {item.requireCoords && (
