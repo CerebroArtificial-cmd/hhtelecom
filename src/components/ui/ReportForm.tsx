@@ -28,6 +28,21 @@ async function fileToDataURL(file: File): Promise<string> {
   });
 }
 
+const TOTAL_PHOTOS_TARGET = 93;
+
+function countPhotos(data: ReportData) {
+  const ph = (data as any)?.photosUploads || {};
+  let count = 0;
+  for (const key of Object.keys(ph)) {
+    const entry = ph[key] || {};
+    const files = entry.files || [];
+    const urls = entry.urls || [];
+    const names = entry.names || [];
+    count += Math.max(files.length, urls.length, names.length);
+  }
+  return count;
+}
+
 function buildPhotoMeta(data: ReportData) {
   const ph = (data as any).photosUploads || {};
   const out: Record<string, any> = {};
@@ -444,6 +459,8 @@ export default function ReportForm() {
 
   const order = ["inicio", "documentation", "infrastructure", "security", "photos", "rules"] as const;
   const pct = getCompletionPercentage();
+  const photoCount = countPhotos(formData);
+  const photoPct = Math.min(100, Math.round((photoCount / TOTAL_PHOTOS_TARGET) * 100));
   const idx = order.indexOf(activeTab as any);
   const syncPct = syncTotal > 0 ? Math.round((syncDone / syncTotal) * 100) : 0;
   const handleTabChange = (value: string) => {
@@ -520,6 +537,15 @@ export default function ReportForm() {
                 className="h-full rounded"
                 style={{ width: `${pct}%`, backgroundColor: "#77807a" }}
               />
+            </div>
+            <div className="mt-2">
+              <div className="flex items-center justify-between text-xs text-amber-700">
+                <span>Fotos: {photoCount}/{TOTAL_PHOTOS_TARGET}</span>
+                <span>{photoPct}%</span>
+              </div>
+              <div className="mt-1 h-2 w-full rounded bg-amber-100">
+                <div className="h-full rounded bg-amber-300" style={{ width: `${photoPct}%` }} />
+              </div>
             </div>
             {syncing && syncTotal > 0 && (
               <div className="mt-2">
